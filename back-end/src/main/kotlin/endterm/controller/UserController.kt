@@ -24,8 +24,13 @@ class UserController(
         return userService.getGrades()
     }
 
-    @GetMapping("/getUserInfo")
-    fun getUserInfo(): ResponseEntity<Any>? {
+    @GetMapping("/getUserTranscript")
+    fun getTranscript(): ResponseEntity<Any>? {
+        return userService.getTranscript()
+    }
+
+    @GetMapping("/getInfo")
+    fun getUserInfo(): ResponseEntity<Any> {
         return userService.getInfo()
     }
 

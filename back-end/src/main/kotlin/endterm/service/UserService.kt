@@ -64,8 +64,13 @@ class UserService(
         return restTemplateService.getGrades(cookie!!)
     }
 
+    fun getTranscript(): ResponseEntity<Any> {
+        val response = restTemplateService.getTranscript(token!!, cookie!!)
+        return response
+    }
+
     fun getInfo(): ResponseEntity<Any> {
-        val response = restTemplateService.getInformation(token!!, cookie!!)
+        val response = restTemplateService.getUserInfo(token!!, cookie!!)
         return response
     }
 

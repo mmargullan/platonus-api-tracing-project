@@ -14,7 +14,8 @@ class RestTemplateService(
     @Value("\${platonus.login.url}") val loginUrl: String,
     @Value("\${platonus.personID.url}") val personIDurl: String,
     @Value("\${platonus.grades.url}") val gradesUrl: String,
-    @Value("\${platonus.userInfo.url}") val userInfoUrl: String
+    @Value("\${platonus.userInfo.url}") val userInfoUrl: String,
+    @Value("\${platonus.transcript.url}") val transcriptUrl: String
 ) {
     data class AuthResponse(
         val token: String?,
@@ -89,7 +90,7 @@ class RestTemplateService(
         }
     }
 
-    fun getInformation(localtoken: String, cookie: String): ResponseEntity<Any> {
+    fun getTranscript(localtoken: String, cookie: String): ResponseEntity<Any> {
         try{
             val restTemplate = RestTemplate()
             val headers = HttpHeaders().apply {
@@ -98,7 +99,7 @@ class RestTemplateService(
                 set("Cookie", cookie)
             }
             val request = HttpEntity("{}", headers)
-            val response = restTemplate.exchange(userInfoUrl, HttpMethod.POST, request, String::class.java)
+            val response = restTemplate.exchange(transcriptUrl, HttpMethod.POST, request, String::class.java)
             val userInfo: UserResponse = Gson().fromJson(response.body, UserResponse::class.java)
             val responseData = mutableMapOf<String, Any>()
             responseData["fullname"] = "${userInfo.student.lastnameEN} ${userInfo.student.firstnameEN}"
@@ -109,6 +110,23 @@ class RestTemplateService(
         }catch (e: Exception) {
             logger.error(e.message, e)
             throw HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while getting information")
+        }
+    }
+
+    fun getUserInfo(localtoken: String, cookie: String): ResponseEntity<Any>{
+        try {
+            val restTemplate = RestTemplate()
+            val headers = HttpHeaders().apply {
+                contentType = MediaType.APPLICATION_JSON
+                set("Token", localtoken)
+                set("Cookie", cookie)
+            }
+            val request = HttpEntity("{}", headers)
+            val response = restTemplate.exchange(userInfoUrl, HttpMethod.GET, request, HashMap::class.java)
+            return ResponseEntity.ok(response.body)
+        }catch (e: Exception){
+            logger.error(e.message, e)
+            throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "Error while getting userInfo")
         }
     }
 
