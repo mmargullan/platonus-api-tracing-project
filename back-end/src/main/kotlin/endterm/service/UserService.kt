@@ -1,23 +1,29 @@
 package endterm.service
 
+import com.google.gson.Gson
 import endterm.config.JwtTokenUtil
 import endterm.model.Dto.HttpMessage
+import endterm.model.Dto.PersonResponse
 import endterm.model.Dto.UserDto
 import endterm.model.User
 import endterm.repository.UserRepository
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
-import org.springframework.web.client.HttpClientErrorException
 
 @Service
 class UserService(
+    @Value("\${platonus.login.url}") val loginUrl: String,
+    @Value("\${platonus.personID.url}") val personIDurl: String,
+    @Value("\${platonus.grades.url}") val gradesUrl: String,
+    @Value("\${platonus.userInfo.url}") val userInfoUrl: String,
     @Autowired private val userRepository: UserRepository,
     @Autowired private val restTemplateService: RestTemplateService,
     private val jwtTokenUtil: JwtTokenUtil
 ){
+    val logger = LoggerFactory.getLogger(RestTemplateService::class.java)
 
     val token: String?
         get() {
@@ -31,47 +37,35 @@ class UserService(
             return (authentication.principal as UserDto).cookie
         }
 
-    fun getAuthenticated(login: String, password: String): HttpMessage {
+    fun getAuthenticated(login: String, password: String): Any? {
 
-        val token = restTemplateService.getToken(login, password)
-        val personId = token.token?.let { restTemplateService.getPersonId(it) }
-
-        if(personId == null){
-            throw HttpClientErrorException(HttpStatus.FORBIDDEN, "Bad Credentials!")
-        }else{
-            val user = User().apply {
-                this.login = login
-                this.password = password
-                this.personId = personId
-            }
-
-            if (user.login?.let { userRepository.findByLogin(it) } == null){
-                userRepository.save(user)
-            }
-
-            val jwtToken = token.cookie?.let { jwtTokenUtil.doGenerateToken(login, token.token, it) }
-
-            return HttpMessage().apply {
-                this.message = "Successfully logged in!"
-                this.status = "Success"
-                this.token = jwtToken
-            }
+        val authResponse = restTemplateService.authorize(login, password)
+        val response = restTemplateService.sendPlatonus(personIDurl, authResponse.token!!, authResponse.cookie!!)
+        val jsonResponse = Gson().fromJson(response.body.toString(), PersonResponse::class.java)
+        val user = User().apply {
+            this.personId = Integer.parseInt(jsonResponse.personID).toLong()
+            this.password = password
+            this.login = login
         }
-
+        if (userRepository.findByLogin(login) != null) {
+            return userRepository.save(user)
+        }
+        val jwt = jwtTokenUtil.doGenerateToken(login, authResponse.token, authResponse.cookie)
+        return HttpMessage().apply {
+            this.status = "ok"
+            this.message = "Successfully logged in"
+            this.token = jwt
+        }
     }
 
-    fun getGrades(): ResponseEntity<Any> {
-        return restTemplateService.getGrades(cookie!!)
+    fun getGrades(): Any? {
+        val response = restTemplateService.sendPlatonus(gradesUrl, token!!, cookie!!)
+        return response.body
     }
 
-    fun getTranscript(): ResponseEntity<Any> {
-        val response = restTemplateService.getTranscript(token!!, cookie!!)
-        return response
-    }
-
-    fun getInfo(): ResponseEntity<Any> {
-        val response = restTemplateService.getUserInfo(token!!, cookie!!)
-        return response
+    fun getUserInfo(): Any? {
+        val response = restTemplateService.sendPlatonus(userInfoUrl, token!!, cookie!!)
+        return response.body
     }
 
 }

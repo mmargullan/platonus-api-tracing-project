@@ -18,8 +18,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @EnableWebSecurity
 class WebSecurityConfig(
     private val jwtAuthorizationFilter: JwtAuthorizationFilter,
-    private val jwtUserDetailsService: UserDetailsService,
-    private val corsConfigurer: WebMvcConfigurer
+    private val jwtUserDetailsService: UserDetailsService
 ): WebSecurityConfigurerAdapter() {
 
     override fun configure(auth: AuthenticationManagerBuilder) {

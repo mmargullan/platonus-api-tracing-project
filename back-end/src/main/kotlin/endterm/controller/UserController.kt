@@ -1,37 +1,29 @@
 package endterm.controller
 
-import endterm.model.Dto.HttpMessage
 import endterm.model.User
 import endterm.service.UserService
-import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/user")
 class UserController(
-    private val userService: UserService,
-    private val authenticationManager: AuthenticationManager
+    private val userService: UserService
 ) {
 
     @PostMapping("/login")
-    fun loginPlatonus(@RequestBody user: User): HttpMessage? {
+    fun loginPlatonus(@RequestBody user: User): Any? {
         return user.login?.let { user.password?.let { it1 -> userService.getAuthenticated(it, it1) } }
     }
 
     @GetMapping("/getGrades")
-    fun getGrades(): ResponseEntity<Any> {
+    fun getGrades(): Any? {
         return userService.getGrades()
     }
 
-    @GetMapping("/getUserTranscript")
-    fun getTranscript(): ResponseEntity<Any>? {
-        return userService.getTranscript()
-    }
-
     @GetMapping("/getInfo")
-    fun getUserInfo(): ResponseEntity<Any> {
-        return userService.getInfo()
+    fun getUserInfo(): Any? {
+        return userService.getUserInfo()
     }
 
 }
