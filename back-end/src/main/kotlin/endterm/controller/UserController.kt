@@ -2,7 +2,6 @@ package endterm.controller
 
 import endterm.model.User
 import endterm.service.UserService
-import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.web.bind.annotation.*
 
 @RestController

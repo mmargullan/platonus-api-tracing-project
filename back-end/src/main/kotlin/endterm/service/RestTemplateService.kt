@@ -43,17 +43,19 @@ class RestTemplateService(
         }
     }
 
-    fun sendPlatonus(url: String, token: String, cookie: String): ResponseEntity<Any> {
+    fun <T> sendPlatonus(url: String, token: String?, cookie: String?, classtype: Class<T>): T? {
         try {
             val restTemplate = RestTemplate()
+
             val headers = HttpHeaders().apply {
                 contentType = MediaType.APPLICATION_JSON
                 set("Token", token)
                 set("Cookie", cookie)
             }
+
             val request = HttpEntity<Any>("{}", headers)
-            val response = restTemplate.exchange(url, HttpMethod.GET, request, Any::class.java)
-            return ResponseEntity.ok().body(response.body)
+            val response = restTemplate.exchange(url, HttpMethod.GET, request, classtype)
+            return response.body
         }catch (e: Exception){
             logger.error(e.message, e)
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Error while sending platonus")

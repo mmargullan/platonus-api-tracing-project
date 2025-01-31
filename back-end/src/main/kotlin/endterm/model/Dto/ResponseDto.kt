@@ -1,5 +1,5 @@
 package endterm.model.Dto
 
 class PersonResponse {
-    var personID: String? = null
+    var personID: Long? = null
 }

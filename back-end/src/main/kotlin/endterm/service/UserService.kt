@@ -40,15 +40,16 @@ class UserService(
     fun getAuthenticated(login: String, password: String): Any? {
 
         val authResponse = restTemplateService.authorize(login, password)
-        val response = restTemplateService.sendPlatonus(personIDurl, authResponse.token!!, authResponse.cookie!!)
-        val jsonResponse = Gson().fromJson(response.body.toString(), PersonResponse::class.java)
+        val response = restTemplateService.sendPlatonus(personIDurl, authResponse.token!!, authResponse.cookie!!, PersonResponse::class.java)
+        logger.info("Response: ${Gson().toJson(response)}")
+
         val user = User().apply {
-            this.personId = Integer.parseInt(jsonResponse.personID).toLong()
+            this.personId = response?.personID
             this.password = password
             this.login = login
         }
-        if (userRepository.findByLogin(login) != null) {
-            return userRepository.save(user)
+        if (userRepository.findByLogin(login) == null) {
+            userRepository.save(user)
         }
         val jwt = jwtTokenUtil.doGenerateToken(login, authResponse.token, authResponse.cookie)
         return HttpMessage().apply {
@@ -59,13 +60,13 @@ class UserService(
     }
 
     fun getGrades(): Any? {
-        val response = restTemplateService.sendPlatonus(gradesUrl, token!!, cookie!!)
-        return response.body
+        val response = restTemplateService.sendPlatonus(gradesUrl, token!!, cookie!!, Any::class.java)
+        return response
     }
 
     fun getUserInfo(): Any? {
-        val response = restTemplateService.sendPlatonus(userInfoUrl, token!!, cookie!!)
-        return response.body
+        val response = restTemplateService.sendPlatonus(userInfoUrl, token!!, cookie!!, Any::class.java)
+        return response
     }
 
 }
