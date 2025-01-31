@@ -20,9 +20,4 @@ class UserController(
         return userService.getGrades()
     }
 
-    @GetMapping("/getInfo")
-    fun getUserInfo(): Any? {
-        return userService.getUserInfo()
-    }
-
 }
