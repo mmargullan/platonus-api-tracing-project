@@ -43,7 +43,7 @@ class RestTemplateService(
         }
     }
 
-    fun <T> sendPlatonus(url: String, token: String?, cookie: String?, classtype: Class<T>): T? {
+    fun <T> sendPlatonus(url: String, token: String?, cookie: String?, classType: Class<T>): T? {
         try {
             val restTemplate = RestTemplate()
 
@@ -54,7 +54,7 @@ class RestTemplateService(
             }
 
             val request = HttpEntity<Any>("{}", headers)
-            val response = restTemplate.exchange(url, HttpMethod.GET, request, classtype)
+            val response = restTemplate.exchange(url, HttpMethod.GET, request, classType)
             return response.body
         }catch (e: Exception){
             logger.error(e.message, e)

@@ -35,49 +35,52 @@ class JwtAuthorizationFilter(
 
         val requestTokenHeader =request.getHeader("Authorization")
         val path = request.requestURI
-        response.contentType = "application/json; charset=utf-8"
-        var username: String? =null
-        var jwtToken: String? =null
-        val errorResponse = mutableMapOf<String, Any>()
-        errorResponse["status"] = "error"
-        if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
-            jwtToken = requestTokenHeader.substring(7)
-            try {
-                username = jwtTokenUtil.getUsernameFromToken(jwtToken)
-            } catch (e: Exception) {
-                errorResponse["message"] = "Invalid token"
-                errorResponse["timestamp"] = LocalTime.now().toString()
+
+        if (!path.equals("/user/login")){
+            logger.info("Filtration in process")
+            response.contentType = "application/json; charset=utf-8"
+            var username: String? =null
+            var jwtToken: String? =null
+            val errorResponse = mutableMapOf<String, Any>()
+            errorResponse["status"] = "error"
+            if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
+                jwtToken = requestTokenHeader.substring(7)
+                try {
+                    username = jwtTokenUtil.getUsernameFromToken(jwtToken)
+                } catch (e: Exception) {
+                    errorResponse["message"] = "Invalid token"
+                    errorResponse["timestamp"] = LocalTime.now().toString()
+                    errorResponse["path"] = path
+                    val errorJson = Gson().toJson(errorResponse)
+                    response.status = HttpStatus.FORBIDDEN.value()
+                    response.writer.use { it.print(errorJson) }
+                    return
+                }
+            } else if (requestTokenHeader == null || !requestTokenHeader.startsWith("Bearer ")){
+                errorResponse["message"] = "No authorization header found or incorrect authorization header"
+                errorResponse["timestamp"] = LocalDateTime.now().toString()
                 errorResponse["path"] = path
                 val errorJson = Gson().toJson(errorResponse)
-                response.status = HttpStatus.FORBIDDEN.value()
+                response.status = HttpStatus.UNAUTHORIZED.value()
                 response.writer.use { it.print(errorJson) }
                 return
+            } else{
+                LOGGER.warn("JWT Token does not begin with Bearer String or this request doesn't need Token")
             }
-        } else if (requestTokenHeader == null || !requestTokenHeader.startsWith("Bearer ")){
-            errorResponse["message"] = "No authorization header found or incorrect authorization header"
-            errorResponse["timestamp"] = LocalDateTime.now().toString()
-            errorResponse["path"] = path
-            val errorJson = Gson().toJson(errorResponse)
-            response.status = HttpStatus.UNAUTHORIZED.value()
-            response.writer.use { it.print(errorJson) }
-            return
-        } else{
-            LOGGER.warn("JWT Token does not begin with Bearer String or this request doesn't need Token")
-        }
-        if (username != null && SecurityContextHolder.getContext().authentication == null) {
-            if (jwtTokenUtil.validateToken(jwtToken!!)) {
-                val userDto = UserDto().apply {
-                    this.username = username
-                    this.token = jwtTokenUtil.getTokenFromToken(jwtToken)
-                    this.cookie = jwtTokenUtil.getCookieFromToken(jwtToken)
+            if (username != null && SecurityContextHolder.getContext().authentication == null) {
+                if (jwtTokenUtil.validateToken(jwtToken!!)) {
+                    val userDto = UserDto().apply {
+                        this.username = username
+                        this.token = jwtTokenUtil.getTokenFromToken(jwtToken)
+                        this.cookie = jwtTokenUtil.getCookieFromToken(jwtToken)
+                    }
+                    val authToken = UsernamePasswordAuthenticationToken(userDto, null, emptyList())
+                    authToken.details = WebAuthenticationDetailsSource().buildDetails(request)
+                    SecurityContextHolder.getContext().authentication = authToken
                 }
-                val authToken = UsernamePasswordAuthenticationToken(userDto, null, emptyList())
-                authToken.details = WebAuthenticationDetailsSource().buildDetails(request)
-                SecurityContextHolder.getContext().authentication = authToken
             }
         }
         filterChain.doFilter(request, response)
-
     }
 
 }
