@@ -3,7 +3,7 @@ package endterm.exception
 class CustomException(message: String) : Exception(message) {
 
     companion object {
-        const val INTERNAL_ERROR = "Internal error"
+        const val BAD_REQUEST = "Bad request"
     }
 
 }

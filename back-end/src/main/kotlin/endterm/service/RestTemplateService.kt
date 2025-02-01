@@ -2,6 +2,7 @@ package endterm.service
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import endterm.exception.CustomException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
@@ -39,7 +40,7 @@ class RestTemplateService(
 
         }catch (e: Exception) {
             logger.error(e.message, e)
-            throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "Error while logging in")
+            throw CustomException(e.message.toString())
         }
     }
 
@@ -58,7 +59,7 @@ class RestTemplateService(
             return response.body
         }catch (e: Exception){
             logger.error(e.message, e)
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Error while sending platonus")
+            throw CustomException(e.message.toString())
         }
     }
 

@@ -2,6 +2,7 @@ package endterm.service
 
 import com.google.gson.Gson
 import endterm.config.JwtTokenUtil
+import endterm.exception.CustomException
 import endterm.model.Dto.HttpMessage
 import endterm.model.Dto.UserDto
 import endterm.model.Dto.UserInfoResponse
@@ -42,13 +43,13 @@ class UserService(
             return (authentication.principal as UserDto).cookie
         }
 
-    fun getAuthenticated(login: String, password: String): Any? {
+    fun getAuthenticated(login: String, password: String): HttpMessage {
 
         try{
             val authResponse = restTemplateService.authorize(login, password)
             val response = restTemplateService.sendPlatonus(userInfoUrl, authResponse.token!!, authResponse.cookie!!, UserInfoResponse::class.java) ?:
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid credentials")
-            val student = response.student ?: return null
+            val student = response.student ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid request")
             logger.info("Response: ${Gson().toJson(response)}")
 
             val group = Group().apply {
@@ -85,7 +86,7 @@ class UserService(
 
         }catch (ex: Exception){
             logger.error("Error while logging in: ", ex)
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Error while logging in")
+            throw CustomException(CustomException.BAD_REQUEST)
         }
     }
 

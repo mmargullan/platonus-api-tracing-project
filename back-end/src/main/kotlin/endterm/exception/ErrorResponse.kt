@@ -1,7 +1,6 @@
 package endterm.exception
 
 import java.time.LocalDateTime
-import java.util.*
 
 data class ErrorResponse(
     val status: Int,

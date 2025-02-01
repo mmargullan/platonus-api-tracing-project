@@ -1,5 +1,6 @@
 package endterm.controller
 
+import endterm.model.Dto.HttpMessage
 import endterm.model.User
 import endterm.service.UserService
 import org.springframework.web.bind.annotation.*
@@ -11,7 +12,7 @@ class UserController(
 ) {
 
     @PostMapping("/login")
-    fun loginPlatonus(@RequestBody user: User): Any? {
+    fun loginPlatonus(@RequestBody user: User): HttpMessage? {
         return user.login?.let { user.password?.let { it1 -> userService.getAuthenticated(it, it1) } }
     }
 

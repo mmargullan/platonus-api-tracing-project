@@ -17,7 +17,7 @@ class ExceptionHandler {
     @ExceptionHandler(CustomException::class)
     fun handleException(ex: CustomException, request: WebRequest): ResponseEntity<ErrorResponse> {
         val errorResponse = ErrorResponse(
-            status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            status = HttpStatus.BAD_REQUEST.value(),
             message = ex.message ?: "Unexpected error",
             timestamp = LocalDateTime.now().toString(),
             path = (request as ServletWebRequest).request.requestURL.toString()
