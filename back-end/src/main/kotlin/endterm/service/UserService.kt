@@ -3,7 +3,7 @@ package endterm.service
 import com.google.gson.Gson
 import endterm.config.JwtTokenUtil
 import endterm.exception.CustomException
-import endterm.model.Dto.HttpMessage
+import endterm.model.Dto.AuthHttpMessage
 import endterm.model.Dto.UserDto
 import endterm.model.Dto.UserInfoResponse
 import endterm.model.Group
@@ -43,7 +43,7 @@ class UserService(
             return (authentication.principal as UserDto).cookie
         }
 
-    fun getAuthenticated(login: String, password: String): HttpMessage {
+    fun getAuthenticated(login: String, password: String): AuthHttpMessage {
 
         try{
             val authResponse = restTemplateService.authorize(login, password)
@@ -78,7 +78,7 @@ class UserService(
             }
             val jwt = jwtTokenUtil.doGenerateToken(login, authResponse.token, authResponse.cookie)
 
-            return HttpMessage().apply {
+            return AuthHttpMessage().apply {
                 this.status = "ok"
                 this.message = "Successfully logged in"
                 this.token = jwt

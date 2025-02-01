@@ -1,7 +1,7 @@
 package endterm.model.Dto
 
 
-class HttpMessage {
+class AuthHttpMessage {
     var message: String? = null
     var status: String? = null
     var token: String? = null
