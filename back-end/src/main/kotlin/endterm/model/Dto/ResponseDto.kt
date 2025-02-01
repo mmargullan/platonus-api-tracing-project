@@ -13,3 +13,7 @@ class Student{
 class UserInfoResponse {
     var student: Student? = null
 }
+
+class PersonIdResponse {
+    var personID: Long? = null
+}

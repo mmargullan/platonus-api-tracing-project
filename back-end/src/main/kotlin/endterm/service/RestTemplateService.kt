@@ -13,13 +13,11 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
 @Component
-class RestTemplateService(
-    @Value("\${platonus.login.url}") val loginUrl: String,
-) {
+class RestTemplateService() {
 
     val logger = LoggerFactory.getLogger(RestTemplateService::class.java)
 
-    fun authorize(login: String, password: String): AuthResponse {
+    fun authorize(url: String, login: String, password: String): AuthResponse {
         try {
             val restTemplate = RestTemplate()
             val headers = HttpHeaders().apply {
@@ -31,7 +29,7 @@ class RestTemplateService(
             val credentials = gson.toJson(creds)
             val request = HttpEntity(credentials, headers)
 
-            val response = restTemplate.exchange(loginUrl, HttpMethod.POST, request, String::class.java)
+            val response = restTemplate.exchange(url, HttpMethod.POST, request, String::class.java)
             val jsonResponse = Gson().fromJson(response.body, JsonObject::class.java)
 
             val cookie = response.headers[HttpHeaders.SET_COOKIE]?.first()

@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import endterm.config.JwtTokenUtil
 import endterm.exception.CustomException
 import endterm.model.Dto.AuthHttpMessage
+import endterm.model.Dto.PersonIdResponse
 import endterm.model.Dto.UserDto
 import endterm.model.Dto.UserInfoResponse
 import endterm.model.Group
@@ -46,8 +47,9 @@ class UserService(
     fun getAuthenticated(login: String, password: String): AuthHttpMessage {
 
         try{
-            val authResponse = restTemplateService.authorize(login, password)
-            val response = restTemplateService.sendPlatonus(userInfoUrl, authResponse.token!!, authResponse.cookie!!, UserInfoResponse::class.java) ?:
+            val authResponse = restTemplateService.authorize(loginUrl, login, password)
+            val personId = restTemplateService.sendPlatonus(personIDurl, authResponse.token!!, authResponse.cookie!!, PersonIdResponse::class.java)?.personID
+            val response = restTemplateService.sendPlatonus(userInfoUrl + "/$personId/ru", authResponse.token!!, authResponse.cookie!!, UserInfoResponse::class.java) ?:
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid credentials")
             val student = response.student ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid request")
             logger.info("Response: ${Gson().toJson(response)}")
@@ -91,7 +93,7 @@ class UserService(
     }
 
     fun getGrades(): Any? {
-        val response = restTemplateService.sendPlatonus(userInfoUrl, token!!, cookie!!, Any::class.java)
+        val response = restTemplateService.sendPlatonus(gradesUrl, token!!, cookie!!, Any::class.java)
         return response
     }
 
