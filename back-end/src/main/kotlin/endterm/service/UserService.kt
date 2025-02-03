@@ -52,7 +52,6 @@ class UserService(
             val response = restTemplateService.sendPlatonus(userInfoUrl + "/$personId/ru", authResponse.token!!, authResponse.cookie!!, UserInfoResponse::class.java) ?:
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid credentials")
             val student = response.student ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid request")
-            logger.info("Response: ${Gson().toJson(response)}")
 
             val group = Group().apply {
                 this.id = student.groupID
