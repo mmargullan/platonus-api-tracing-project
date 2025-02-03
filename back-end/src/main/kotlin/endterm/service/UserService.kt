@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import java.util.*
 
 @Service
 class UserService(
@@ -59,7 +60,7 @@ class UserService(
             }
             if (!groupRepository.findById(group.id!!).isPresent){
                 groupRepository.save(group)
-                logger.info("Group ${group.id} was saved")
+                logger.info("Group ${group.name} was saved")
             }
 
             val user = User().apply {
@@ -75,7 +76,7 @@ class UserService(
             }
             if (userRepository.findByPersonId(user.personId!!) == null) {
                 userRepository.save(user)
-                logger.info("User ${user.personId} was saved")
+                logger.info("User ${user.login} was saved")
             }
             updateGroup(group)
 
@@ -105,6 +106,10 @@ class UserService(
         group.studentCount = count
         group.averageGpa = averageGpa
         groupRepository.save(group)
+    }
+
+    fun getGroup(groupId: Long): Optional<Group> {
+        return groupRepository.findById(groupId)
     }
 
 }

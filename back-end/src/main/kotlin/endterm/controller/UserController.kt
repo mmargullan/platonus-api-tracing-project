@@ -21,4 +21,9 @@ class UserController(
         return userService.getGrades()
     }
 
+    @GetMapping("/getGroup/{groupId}")
+    fun getGroup(@PathVariable groupId: Long): Any? {
+        return userService.getGroup(groupId)
+    }
+
 }
