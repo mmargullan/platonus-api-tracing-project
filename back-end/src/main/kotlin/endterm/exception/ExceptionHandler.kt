@@ -23,7 +23,7 @@ class ExceptionHandler {
             path = (request as ServletWebRequest).request.requestURL.toString()
         )
         logger.error("Unexpected error occured: ${ex.message}")
-        return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
     }
 
 }

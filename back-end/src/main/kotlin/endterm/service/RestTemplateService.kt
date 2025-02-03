@@ -24,14 +24,10 @@ class RestTemplateService() {
                 contentType = MediaType.APPLICATION_JSON
             }
 
-            val creds = LoginRequest(login, password)
-            val gson = Gson()
-            val credentials = gson.toJson(creds)
+            val credentials = Gson().toJson(LoginRequest(login, password))
             val request = HttpEntity(credentials, headers)
-
             val response = restTemplate.exchange(url, HttpMethod.POST, request, String::class.java)
             val jsonResponse = Gson().fromJson(response.body, JsonObject::class.java)
-
             val cookie = response.headers[HttpHeaders.SET_COOKIE]?.first()
             val token = jsonResponse["auth_token"]?.asString
 

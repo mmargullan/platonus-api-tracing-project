@@ -78,6 +78,8 @@ class UserService(
                 userRepository.save(user)
                 logger.info("User ${user.personId} was saved")
             }
+            updateGroup(group)
+
             val jwt = jwtTokenUtil.doGenerateToken(login, authResponse.token, authResponse.cookie)
 
             return AuthHttpMessage().apply {
@@ -95,6 +97,15 @@ class UserService(
     fun getGrades(): Any? {
         val response = restTemplateService.sendPlatonus(gradesUrl, token!!, cookie!!, Any::class.java)
         return response
+    }
+
+    fun updateGroup(group: Group) {
+        val count = userRepository.countUsersByGroupId(group.id!!)
+        val averageGpa = userRepository.getAverageGpa(group.id!!)
+
+        group.studentCount = count
+        group.averageGpa = averageGpa
+        groupRepository.save(group)
     }
 
 }
