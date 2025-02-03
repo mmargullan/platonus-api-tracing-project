@@ -18,6 +18,12 @@ class User {
     var password: String? = null
 
     @Column
+    var firstName: String? = null
+
+    @Column
+    var lastName: String? = null
+
+    @Column
     var personId: Long? = null
 
     @Column

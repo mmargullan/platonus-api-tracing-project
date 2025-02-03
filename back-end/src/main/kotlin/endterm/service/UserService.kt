@@ -67,6 +67,8 @@ class UserService(
 
             val user = User().apply {
                 this.personId = student.personID
+                this.firstName = student.firstnameEN
+                this.lastName = student.lastnameEN
                 this.gpa = student.GPA
                 this.phone = student.mobilePhone
                 this.groupName = student.groupName
@@ -79,8 +81,8 @@ class UserService(
             if (userRepository.findByPersonId(user.personId!!) == null) {
                 userRepository.save(user)
                 logger.info("User ${user.login} was saved")
+                updateGroup(group)
             }
-            updateGroup(group)
 
             val jwt = jwtTokenUtil.doGenerateToken(login, authResponse.token, authResponse.cookie)
 
@@ -97,7 +99,7 @@ class UserService(
     }
 
     fun getGrades(): Any? {
-        val response = restTemplateService.sendPlatonus(gradesUrl, token!!, cookie!!, Any::class.java)
+        val response = restTemplateService.sendPlatonus(userInfoUrl, token!!, cookie!!, Any::class.java)
         return response
     }
 
