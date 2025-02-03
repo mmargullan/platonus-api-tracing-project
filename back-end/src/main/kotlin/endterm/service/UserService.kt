@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import java.util.*
+import javax.transaction.Transactional
 
 @Service
 class UserService(
@@ -45,6 +46,7 @@ class UserService(
             return (authentication.principal as UserDto).cookie
         }
 
+    @Transactional(rollbackOn = [Exception::class])
     fun getAuthenticated(login: String, password: String): AuthHttpMessage {
 
         try{
