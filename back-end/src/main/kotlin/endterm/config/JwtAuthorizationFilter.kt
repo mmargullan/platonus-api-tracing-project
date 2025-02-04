@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.stereotype.Component
@@ -71,10 +72,13 @@ class JwtAuthorizationFilter(
                 if (jwtTokenUtil.validateToken(jwtToken!!)) {
                     val userDto = UserDto().apply {
                         this.username = username
+                        this.role = listOf(jwtTokenUtil.getRoleFromToken(jwtToken))
                         this.token = jwtTokenUtil.getTokenFromToken(jwtToken)
                         this.cookie = jwtTokenUtil.getCookieFromToken(jwtToken)
                     }
-                    val authToken = UsernamePasswordAuthenticationToken(userDto, null, emptyList())
+                    val authorities = userDto.role?.map { SimpleGrantedAuthority(it) }
+
+                    val authToken = UsernamePasswordAuthenticationToken(userDto, null, authorities)
                     authToken.details = WebAuthenticationDetailsSource().buildDetails(request)
                     SecurityContextHolder.getContext().authentication = authToken
                 }

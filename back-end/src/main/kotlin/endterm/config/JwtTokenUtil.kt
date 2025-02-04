@@ -70,4 +70,8 @@ class JwtTokenUtil: Serializable {
         return getClaimFromToken(token, Function { obj: Claims -> obj.expiration })
     }
 
+    fun getRoleFromToken(token: String?): String {
+        return getClaimFromToken(token) { obj: Claims -> "ROLE_${obj["role"].toString()}" }
+    }
+
 }

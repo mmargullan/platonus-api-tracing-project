@@ -77,7 +77,6 @@ class UserService(
                 this.login = login
                 this.courseNumber = student.courseNumber
                 this.group = group
-                this.role = "USER"
             }
             if (userRepository.findByPersonId(user.personId!!) == null) {
                 userRepository.save(user)
@@ -100,7 +99,7 @@ class UserService(
     }
 
     fun getGrades(): Any? {
-        val response = restTemplateService.sendPlatonus(userInfoUrl, token!!, cookie!!, Any::class.java)
+        val response = restTemplateService.sendPlatonus(gradesUrl, token!!, cookie!!, Any::class.java)
         return response
     }
 
