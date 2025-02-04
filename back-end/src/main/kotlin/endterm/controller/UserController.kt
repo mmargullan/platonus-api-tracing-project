@@ -3,6 +3,7 @@ package endterm.controller
 import endterm.model.Dto.AuthHttpMessage
 import endterm.model.User
 import endterm.service.UserService
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -16,6 +17,7 @@ class UserController(
         return user.login?.let { user.password?.let { it1 -> userService.getAuthenticated(it, it1) } }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/getGrades")
     fun getGrades(): Any? {
         return userService.getGrades()

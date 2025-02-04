@@ -1,5 +1,6 @@
 package endterm.config
 
+import endterm.model.User
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
@@ -18,11 +19,15 @@ class JwtTokenUtil: Serializable {
     @Value("\${jwt.validation.time}")
     private val jwtValidationTime: Int? = null
 
-    fun doGenerateToken(login: String, token: String, cookie: String): String {
+    fun doGenerateToken(user: User, token: String, cookie: String): String {
         return Jwts.builder()
-            .claim("username", login)
+            .claim("username", user.login)
             .claim("token", token)
             .claim("cookie", cookie)
+            .claim("firstName", user.firstName)
+            .claim("lastName", user.lastName)
+            .claim("groupName", user.groupName)
+            .claim("role", user.role)
             .setIssuedAt(Date(System.currentTimeMillis()))
             .setExpiration(Date(System.currentTimeMillis() + jwtValidationTime!!))
             .signWith(SignatureAlgorithm.HS256, jwtSecret)

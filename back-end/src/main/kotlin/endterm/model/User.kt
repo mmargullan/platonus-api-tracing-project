@@ -18,6 +18,9 @@ class User {
     var password: String? = null
 
     @Column
+    var role: String? = null
+
+    @Column
     var firstName: String? = null
 
     @Column

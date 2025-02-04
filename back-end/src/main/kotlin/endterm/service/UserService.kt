@@ -77,6 +77,7 @@ class UserService(
                 this.login = login
                 this.courseNumber = student.courseNumber
                 this.group = group
+                this.role = "USER"
             }
             if (userRepository.findByPersonId(user.personId!!) == null) {
                 userRepository.save(user)
@@ -84,7 +85,7 @@ class UserService(
                 updateGroup(group)
             }
 
-            val jwt = jwtTokenUtil.doGenerateToken(login, authResponse.token, authResponse.cookie)
+            val jwt = jwtTokenUtil.doGenerateToken(user, authResponse.token, authResponse.cookie)
 
             return AuthHttpMessage().apply {
                 this.status = "ok"
