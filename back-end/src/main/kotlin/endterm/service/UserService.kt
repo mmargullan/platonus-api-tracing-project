@@ -1,6 +1,5 @@
 package endterm.service
 
-import com.google.gson.Gson
 import endterm.config.JwtTokenUtil
 import endterm.exception.CustomException
 import endterm.model.Dto.AuthHttpMessage
@@ -79,6 +78,7 @@ class UserService(
                 this.group = group
             }
             if (userRepository.findByPersonId(user.personId!!) == null) {
+                user.role = "USER"
                 userRepository.save(user)
                 logger.info("User ${user.login} was saved")
                 updateGroup(group)
