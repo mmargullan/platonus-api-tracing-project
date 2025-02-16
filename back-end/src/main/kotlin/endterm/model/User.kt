@@ -12,10 +12,10 @@ class User {
     var id: Long? = null
 
     @Column(unique = true)
-    var login: String? = null
+    lateinit var login: String
 
     @Column
-    var password: String? = null
+    lateinit var password: String
 
     @Column
     var firstName: String? = null
@@ -41,7 +41,7 @@ class User {
     @Column
     var courseNumber: Long? = null
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "groupId", nullable = false)
     var group: Group? = null
 

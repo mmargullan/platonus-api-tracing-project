@@ -12,8 +12,8 @@ class UserController(
 ) {
 
     @PostMapping("/login")
-    fun loginPlatonus(@RequestBody user: User): AuthHttpMessage? {
-        return user.login?.let { user.password?.let { it1 -> userService.getAuthenticated(it, it1) } }
+    fun loginPlatonus(@RequestBody(required = true) user: User): AuthHttpMessage? {
+        return userService.getAuthenticated(user.login, user.password)
     }
 
     @GetMapping("/getGrades")
