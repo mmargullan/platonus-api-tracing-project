@@ -13,5 +13,6 @@ interface UserRepository: JpaRepository<User, Long> {
 
     @Query("SELECT COALESCE(AVG(u.gpa), 0.0) FROM User u WHERE u.group.id = :groupId")
     fun getAverageGpa(groupId: Long): Double?
+    fun findByLogin(login: String): User?
 
 }

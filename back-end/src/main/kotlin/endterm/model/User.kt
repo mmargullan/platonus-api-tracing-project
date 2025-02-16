@@ -18,6 +18,9 @@ class User {
     lateinit var password: String
 
     @Column
+    var role: String? = null
+
+    @Column
     var firstName: String? = null
 
     @Column

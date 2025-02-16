@@ -1,6 +1,5 @@
 package endterm.service
 
-import com.google.gson.Gson
 import endterm.config.JwtTokenUtil
 import endterm.exception.CustomException
 import endterm.model.Dto.AuthHttpMessage
@@ -79,12 +78,13 @@ class UserService(
                 this.group = group
             }
             if (userRepository.findByPersonId(user.personId!!) == null) {
+                user.role = "USER"
                 userRepository.save(user)
                 logger.info("User ${user.login} was saved")
                 updateGroup(group)
             }
 
-            val jwt = jwtTokenUtil.doGenerateToken(login, authResponse.token, authResponse.cookie)
+            val jwt = jwtTokenUtil.doGenerateToken(user, authResponse.token, authResponse.cookie)
 
             return AuthHttpMessage().apply {
                 this.status = "ok"
@@ -99,7 +99,7 @@ class UserService(
     }
 
     fun getGrades(): Any? {
-        val response = restTemplateService.sendPlatonus(userInfoUrl, token!!, cookie!!, Any::class.java)
+        val response = restTemplateService.sendPlatonus(gradesUrl, token!!, cookie!!, Any::class.java)
         return response
     }
 
