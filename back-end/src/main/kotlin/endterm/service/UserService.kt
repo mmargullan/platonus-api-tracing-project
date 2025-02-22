@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import java.math.BigDecimal
+import java.math.RoundingMode
 import javax.transaction.Transactional
 
 @Service
@@ -79,7 +81,7 @@ class UserService(
 
     fun updateGroup(group: Group) {
         val count = userRepository.countUsersByGroupId(group.id!!)
-        val averageGpa = userRepository.getAverageGpa(group.id!!)
+        val averageGpa = BigDecimal(userRepository.getAverageGpa(group.id!!)!!).setScale(3, RoundingMode.HALF_UP).toDouble()
 
         group.studentCount = count
         group.averageGpa = averageGpa
