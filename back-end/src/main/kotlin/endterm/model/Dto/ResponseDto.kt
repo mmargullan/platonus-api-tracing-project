@@ -1,6 +1,7 @@
 package endterm.model.Dto
 
 class Student{
+
     var personID: Long? = null
     var lastnameEN: String? = null
     var firstnameEN: String? = null
@@ -10,6 +11,7 @@ class Student{
     var mobilePhone: String? = null
     var specializationNameEn: String? = null
     var courseNumber: Long? = null
+
 }
 
 class UserInfoResponse {
