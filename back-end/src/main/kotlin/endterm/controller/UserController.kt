@@ -16,14 +16,9 @@ class UserController(
         return userService.getAuthenticated(user.login, user.password)
     }
 
-    @GetMapping("/getGrades")
-    fun getGrades(): Any? {
-        return userService.getGrades()
-    }
-
-    @GetMapping("/getGroup/{groupId}")
-    fun getGroup(@PathVariable groupId: Long): Any? {
-        return userService.getGroup(groupId)
+    @GetMapping("/getAll")
+    fun getAll(): List<User> {
+        return userService.getAll()
     }
 
 }

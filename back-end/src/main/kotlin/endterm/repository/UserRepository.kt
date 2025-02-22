@@ -16,4 +16,7 @@ interface UserRepository: JpaRepository<User, Long> {
 
     fun findByLogin(login: String): User?
 
+    @Query("select u from User u where u.group.id = :groupId order by u.gpa desc")
+    fun findUsersByGroupId(groupId: Long): List<User>
+
 }
