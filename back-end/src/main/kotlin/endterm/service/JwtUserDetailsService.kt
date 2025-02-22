@@ -1,19 +1,22 @@
 package endterm.service
 
-import org.springframework.security.core.userdetails.User
+import endterm.config.SpringSecurityUser
+import endterm.repository.UserRepository
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
-import org.springframework.stereotype.Service
+import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.stereotype.Component
 
-@Service
-class JwtUserDetailsService: UserDetailsService {
+@Component
+class JwtUserDetailsService(
+    private val userRepository: UserRepository
+): UserDetailsService {
 
     override fun loadUserByUsername(username: String): UserDetails {
-        return User.builder()
-            .username(username)
-            .password("")
-            .authorities("USER")
-            .build()
+        val user = userRepository.findByLogin(username)
+        ?: throw UsernameNotFoundException(username)
+
+        return SpringSecurityUser(user)
     }
 
 }
