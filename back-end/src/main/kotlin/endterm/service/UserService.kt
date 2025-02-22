@@ -22,10 +22,7 @@ import javax.transaction.Transactional
 
 @Service
 class UserService(
-    @Value("\${platonus.login.url}") val loginUrl: String,
-    @Value("\${platonus.personID.url}") val personIDurl: String,
-    @Value("\${platonus.grades.url}") val gradesUrl: String,
-    @Value("\${platonus.userInfo.url}") val userInfoUrl: String,
+    @Value("\${platonus.api.url}") val platonusApiUrl: String,
     @Autowired private val userRepository: UserRepository,
     @Autowired private val restTemplateService: RestTemplateService,
     @Autowired private val groupRepository: GroupRepository,
@@ -49,9 +46,9 @@ class UserService(
     fun getAuthenticated(login: String, password: String): AuthHttpMessage {
 
         try{
-            val authResponse = restTemplateService.authorize(loginUrl, login, password)
-            val personId = restTemplateService.sendPlatonus(personIDurl, authResponse.token!!, authResponse.cookie!!, PersonIdResponse::class.java)?.personID
-            val response = restTemplateService.sendPlatonus(userInfoUrl + "/$personId/ru", authResponse.token!!, authResponse.cookie!!, UserInfoResponse::class.java) ?:
+            val authResponse = restTemplateService.authorize("$platonusApiUrl/rest/api/login", login, password)
+            val personId = restTemplateService.sendPlatonus("$platonusApiUrl/rest/api/person/personID", authResponse.token!!, authResponse.cookie!!, PersonIdResponse::class.java)?.personID
+            val response = restTemplateService.sendPlatonus("$platonusApiUrl/rest/student/studentInfo/$personId/ru", authResponse.token, authResponse.cookie, UserInfoResponse::class.java) ?:
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid credentials")
             val student = response.student ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid request")
 
@@ -99,7 +96,7 @@ class UserService(
     }
 
     fun getGrades(): Any? {
-        val response = restTemplateService.sendPlatonus(gradesUrl, token!!, cookie!!, Any::class.java)
+        val response = restTemplateService.sendPlatonus("$platonusApiUrl/journal/2024/1/", token!!, cookie!!, Any::class.java)
         return response
     }
 
