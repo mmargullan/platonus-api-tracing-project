@@ -4,7 +4,6 @@ import endterm.config.JwtTokenUtil
 import endterm.exception.CustomException
 import endterm.model.Dto.AuthHttpMessage
 import endterm.model.Dto.PersonIdResponse
-import endterm.model.Dto.UserDto
 import endterm.model.Dto.UserInfoResponse
 import endterm.model.Group
 import endterm.model.User
@@ -14,10 +13,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
-import java.util.*
 import javax.transaction.Transactional
 
 @Service
@@ -28,30 +25,17 @@ class UserService(
     @Autowired private val groupRepository: GroupRepository,
     private val jwtTokenUtil: JwtTokenUtil
 ){
+
     val logger = LoggerFactory.getLogger(RestTemplateService::class.java)
-
-    val token: String?
-        get() {
-            val authentication = SecurityContextHolder.getContext().authentication
-            return (authentication.principal as UserDto).token
-        }
-
-    val cookie: String?
-        get() {
-            val authentication = SecurityContextHolder.getContext().authentication
-            return (authentication.principal as UserDto).cookie
-        }
 
     @Transactional(rollbackOn = [Exception::class])
     fun getAuthenticated(login: String, password: String): AuthHttpMessage {
-
         try{
             val authResponse = restTemplateService.authorize("$platonusApiUrl/rest/api/login", login, password)
             val personId = restTemplateService.sendPlatonus("$platonusApiUrl/rest/api/person/personID", authResponse.token!!, authResponse.cookie!!, PersonIdResponse::class.java)?.personID
             val response = restTemplateService.sendPlatonus("$platonusApiUrl/rest/student/studentInfo/$personId/ru", authResponse.token, authResponse.cookie, UserInfoResponse::class.java) ?:
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid credentials")
             val student = response.student ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid request")
-
             val group = Group().apply {
                 this.id = student.groupID
                 this.name = student.groupName
@@ -80,7 +64,6 @@ class UserService(
                 logger.info("User ${user.login} was saved")
                 updateGroup(group)
             }
-
             val jwt = jwtTokenUtil.doGenerateToken(user, authResponse.token, authResponse.cookie)
 
             return AuthHttpMessage().apply {
@@ -88,16 +71,10 @@ class UserService(
                 this.message = "Successfully logged in"
                 this.token = jwt
             }
-
         }catch (ex: Exception){
             logger.error("Error while logging in: ", ex)
             throw CustomException(CustomException.BAD_REQUEST)
         }
-    }
-
-    fun getGrades(): Any? {
-        val response = restTemplateService.sendPlatonus("$platonusApiUrl/journal/2024/1/", token!!, cookie!!, Any::class.java)
-        return response
     }
 
     fun updateGroup(group: Group) {
@@ -109,8 +86,8 @@ class UserService(
         groupRepository.save(group)
     }
 
-    fun getGroup(groupId: Long): Optional<Group> {
-        return groupRepository.findById(groupId)
+    fun getAll(): List<User> {
+        return userRepository.findAll()
     }
 
 }

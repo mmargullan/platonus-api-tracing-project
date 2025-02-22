@@ -8,6 +8,4 @@ import java.util.*
 @Repository
 interface GroupRepository: JpaRepository<Group, Long> {
 
-    override fun findById(groupId: Long): Optional<Group>
-
 }

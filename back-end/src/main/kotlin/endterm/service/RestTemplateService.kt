@@ -4,10 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import endterm.exception.CustomException
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
+import org.springframework.http.*
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
@@ -31,7 +28,6 @@ class RestTemplateService() {
             val token = jsonResponse["auth_token"]?.asString
 
             return AuthResponse(token, cookie)
-
         }catch (e: Exception) {
             logger.error(e.message, e)
             throw CustomException(e.message.toString())
@@ -41,13 +37,11 @@ class RestTemplateService() {
     fun <T> sendPlatonus(url: String, token: String?, cookie: String?, classType: Class<T>): T? {
         try {
             val restTemplate = RestTemplate()
-
             val headers = HttpHeaders().apply {
                 contentType = MediaType.APPLICATION_JSON
                 set("Token", token)
                 set("Cookie", cookie)
             }
-
             val request = HttpEntity<Any>("{}", headers)
             val response = restTemplate.exchange(url, HttpMethod.GET, request, classType)
             return response.body
@@ -63,4 +57,5 @@ class RestTemplateService() {
     )
 
     data class LoginRequest(val login: String, val password: String)
+
 }
