@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import endterm.component.DateDeserializer
 import endterm.component.DateSerializer
-import java.time.LocalDate
 
 class Student{
 

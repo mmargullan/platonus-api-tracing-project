@@ -7,14 +7,17 @@ import endterm.repository.DocumentRepository
 import org.apache.poi.xwpf.usermodel.XWPFDocument
 import org.apache.poi.xwpf.usermodel.XWPFParagraph
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.nio.file.Paths
 import java.util.*
 
 @Service
 class DocumentService(
+    @Value("\${cv.template.dir}") private val templateDir: String,
     private val tokenService: TokenService,
     private val documentRepository: DocumentRepository
 ) {
@@ -23,16 +26,16 @@ class DocumentService(
 
     fun generateBase64(nationality: String): String {
         try {
-            val pdfBytes = generateResume(nationality)
-            val base64code = Base64.getEncoder().encodeToString(pdfBytes)
+            val fileLink = generateResume(nationality)
 
             logger.info("Saving document")
             val document = Document()
             document.type = DocTypeEnum.RESUME.value
             document.personId = tokenService.personId
-            document.base64code = base64code
+            document.fileLink = fileLink
             documentRepository.save(document)
 
+            val base64code = Base64.getEncoder().encodeToString(File(fileLink).readBytes())
             return base64code
         } catch (e: Exception) {
             logger.error("Error generating document", e)
@@ -40,9 +43,9 @@ class DocumentService(
         }
     }
 
-    fun generateResume(nationality: String): ByteArray {
+    fun generateResume(nationality: String): String {
         val data = tokenService.dataToMap(nationality)
-        val docxTemplate = FileInputStream(File("src/files/cv_template.docx"))
+        val docxTemplate = FileInputStream(File("$templateDir/cv_template.docx"))
         val document = XWPFDocument(docxTemplate)
         for (paragraph in document.paragraphs) {
             replacePlaceholdersInParagraph(paragraph, data)
@@ -81,7 +84,7 @@ class DocumentService(
         }
     }
 
-    private fun convertDocxToPdf(docxFile: File): ByteArray {
+    private fun convertDocxToPdf(docxFile: File): String {
         val pdfFile = File.createTempFile("resume", ".pdf")
         try {
             val command = listOf("soffice", "--headless", "--convert-to", "pdf", "--outdir",
@@ -99,8 +102,14 @@ class DocumentService(
             if (!actualPdfFile.exists()) {
                 throw RuntimeException("PDF file was not created")
             }
-            return actualPdfFile.readBytes()
+            val targetPdfFile = Paths.get(templateDir, "${tokenService.firstName}_resume.pdf").toFile()
+
+            actualPdfFile.copyTo(targetPdfFile, overwrite = true)
+            logger.info("PDF saved to: ${targetPdfFile.absolutePath}")
+
+            return targetPdfFile.absolutePath
         } catch (e: Exception) {
+            logger.error("Error generating pdf", e)
             throw RuntimeException("Failed to convert DOCX to PDF", e)
         } finally {
             docxFile.delete()
