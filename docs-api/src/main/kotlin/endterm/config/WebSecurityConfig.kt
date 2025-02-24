@@ -31,6 +31,20 @@ class WebSecurityConfig(
         http
             .csrf { it.disable() }
             .cors { }
+            .authorizeHttpRequests().antMatchers(
+                "/user/login",
+                "/v2/api-docs",
+                "/v3/api-docs",
+                "/v3/api-docs/**",
+                "/swagger-resources",
+                "/swagger-resources/**",
+                "/configuration/ui",
+                "/configuration/security",
+                "/swagger-ui/**",
+                "/swagger-ui.html",
+                "/webjars/**",
+                "/swagger-ui/index.html"
+            ).permitAll().and()
             .authorizeHttpRequests {
                 it.anyRequest().authenticated()
             }

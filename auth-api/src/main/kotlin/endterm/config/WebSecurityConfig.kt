@@ -43,6 +43,14 @@ class WebSecurityConfig(
             .and()
             .authorizeHttpRequests()
             .antMatchers("/user/login").permitAll()
+            .antMatchers(
+                "/v2/api-docs",
+                "/swagger-resources/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html",
+                "/webjars/**",
+                "/swagger-ui/index.html"
+            ).permitAll()
             .anyRequest().authenticated()
             .and()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)

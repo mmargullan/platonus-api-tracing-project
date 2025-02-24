@@ -30,6 +30,11 @@ class JwtAuthorizationFilter(
         val requestTokenHeader =request.getHeader("Authorization")
         val path = request.requestURI
 
+        if (isPermittedPath(path)) {
+            filterChain.doFilter(request, response)
+            return
+        }
+
         if (!path.equals("/user/login")){
             logger.info("Filtration in process")
             response.contentType = "application/json; charset=utf-8"
@@ -78,6 +83,18 @@ class JwtAuthorizationFilter(
             }
         }
         filterChain.doFilter(request, response)
+    }
+
+    private fun isPermittedPath(path: String): Boolean {
+        val permittedPaths = listOf(
+            "/user/login",
+            "/v2/api-docs",
+            "/swagger-resources",
+            "/swagger-ui.html",
+            "/swagger-ui/",
+            "/webjars/"
+        )
+        return permittedPaths.any { path.startsWith(it) }
     }
 
 }
