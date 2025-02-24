@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface DocumentRepository: JpaRepository<Document, Long> {
+
+    fun findByPersonId(personId: Long): List<Document>
+
 }
