@@ -9,11 +9,10 @@ class GradesController(
     val gradesService: GradesService
 ) {
 
-    @GetMapping("/getGradesByUserId/{userId}")
-    fun getGrades(@PathVariable userId:Long,
-                  @RequestParam(required = true) year: Int,
+    @GetMapping("/getGrades")
+    fun getGrades(@RequestParam(required = true) year: Int,
                   @RequestParam(required = true) semester: Int): Any? {
-        return gradesService.getGradesByUserId(userId, year, semester)
+        return gradesService.getGradesByUserId(year, semester)
     }
 
 }

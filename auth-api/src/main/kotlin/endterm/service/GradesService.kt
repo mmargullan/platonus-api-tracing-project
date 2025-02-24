@@ -23,7 +23,7 @@ class GradesService(
             return (authentication.principal as UserDto).cookie
         }
 
-    fun getGradesByUserId(userId: Long, year: Int, semester: Int): Any? {
+    fun getGradesByUserId(year: Int, semester: Int): Any? {
         return restTemplateService.sendPlatonus("$platonusApiUrl/journal/$year/$semester", token!!, cookie!!, Any::class.java)
     }
 
