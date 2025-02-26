@@ -21,7 +21,7 @@ const handleSubmit = async () => {
   isLoading.value = true;
 
   try {
-    const response = await fetch("http://localhost:8081/user/login", {
+    const response = await fetch("http://test.studforum/api/auth-api/user/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

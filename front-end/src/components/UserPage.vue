@@ -82,7 +82,7 @@ const fetchUserInfo = async () => {
       return;
     }
 
-    const response = await fetch("http://localhost:8081/user/getUserInfo", {
+    const response = await fetch("http://test.studforum/api/auth-api/user/getUserInfo", {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${token}`,
