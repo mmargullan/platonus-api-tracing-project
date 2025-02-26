@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-@Component
 class DateDeserializer : JsonDeserializer<String>() {
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): String {
         val date = LocalDate.parse(p.text, DateTimeFormatter.ofPattern("dd-MM-yyyy"))
