@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import java.math.BigDecimal
@@ -25,7 +26,8 @@ class UserService(
     @Autowired private val userRepository: UserRepository,
     @Autowired private val restTemplateService: RestTemplateService,
     @Autowired private val groupRepository: GroupRepository,
-    private val jwtTokenUtil: JwtTokenUtil
+    private val jwtTokenUtil: JwtTokenUtil,
+    private val tokenService: TokenService
 ){
 
     val logger = LoggerFactory.getLogger(RestTemplateService::class.java)
@@ -95,6 +97,17 @@ class UserService(
 
     fun getAll(): List<User> {
         return userRepository.findAll()
+    }
+
+    fun getUser(): ResponseEntity<Any> {
+        try{
+            val username = tokenService.username
+            val user = userRepository.findByLogin(username!!)
+            return ResponseEntity.ok().body(user)
+        } catch (e: Exception){
+            logger.error("Error in getUser: ", e)
+            throw CustomException("Error in getUser")
+        }
     }
 
 }

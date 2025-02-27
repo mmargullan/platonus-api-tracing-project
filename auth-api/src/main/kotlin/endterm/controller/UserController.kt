@@ -3,6 +3,7 @@ package endterm.controller
 import endterm.model.Dto.AuthHttpMessage
 import endterm.model.User
 import endterm.service.UserService
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -19,6 +20,11 @@ class UserController(
     @GetMapping("/getAll")
     fun getAll(): List<User> {
         return userService.getAll()
+    }
+
+    @GetMapping("/getUser")
+    fun getUser(@PathVariable id: Int): ResponseEntity<Any> {
+        return userService.getUser()
     }
 
 }
