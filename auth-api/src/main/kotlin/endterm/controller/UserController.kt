@@ -23,7 +23,7 @@ class UserController(
     }
 
     @GetMapping("/getUser")
-    fun getUser(@PathVariable id: Int): ResponseEntity<Any> {
+    fun getUser(): ResponseEntity<Any> {
         return userService.getUser()
     }
 
