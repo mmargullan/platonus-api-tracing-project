@@ -1,25 +1,18 @@
 package endterm.service
 
 import endterm.exception.CustomException
-import endterm.model.Dto.UserDto
 import endterm.model.Group
 import endterm.model.User
 import endterm.repository.GroupRepository
 import endterm.repository.UserRepository
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 
 @Service
 class GroupService(
     val groupRepository: GroupRepository,
-    val userRepository: UserRepository
+    val userRepository: UserRepository,
+    private val tokenService: TokenService
 ) {
-
-    val username: String?
-        get() {
-            val authentication = SecurityContextHolder.getContext().authentication
-            return (authentication.principal as UserDto).username
-        }
 
     fun getAll(): List<Group> {
         return groupRepository.findAll()
@@ -44,7 +37,7 @@ class GroupService(
         }
         val students = getAllStudents(group.id!!)
         for (i in students.indices) {
-            if (students[i].login == username) {
+            if (students[i].login == tokenService.username) {
                 return i + 1
             }
         }
