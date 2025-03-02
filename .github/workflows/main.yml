@@ -28,9 +28,9 @@ jobs:
           git pull origin main
           
           export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-          cd auth-api && ./gradlew build -x test && cp build/libs/*.jar /home/ubuntu/auth-api/auth-api.jar
-          cd ../docs-api && ./gradlew build -x test && cp build/libs/*.jar /home/ubuntu/docs-api/docs-api.jar
-          cd ../api-gateway && ./gradlew build -x test && cp build/libs/*.jar /home/ubuntu/api-gateway/api-gateway.jar
+          cd /auth-api && ./gradlew build -x test && cp build/libs/*.jar /app/auth-api/auth-api.jar
+          cd /docs-api && ./gradlew build -x test && cp build/libs/*.jar /app/docs-api/docs-api.jar
+          cd /api-gateway && ./gradlew build -x test && cp build/libs/*.jar /app/api-gateway/api-gateway.jar
 
           sudo systemctl restart auth-api
           sudo systemctl restart docs-api
