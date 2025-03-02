@@ -15,4 +15,9 @@ class GradesController(
         return gradesService.getGradesByUserId(year, semester)
     }
 
+    @GetMapping("/test")
+    fun test(): String {
+        return "test"
+    }
+
 }
