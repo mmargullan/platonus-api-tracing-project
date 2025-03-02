@@ -34,17 +34,17 @@ jobs:
           
           # Запускаем gradlew с sudo и перемещаем файлы
           # Auth API
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./auth-api/gradlew -p ./auth-api build -x test
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./auth-api/gradlew -p ./auth-api clean build -x test
           AUTH_JAR=$(echo "${{ secrets.SSH_PASSWORD }}" | sudo -S find ./auth-api/build/libs/ -name "*.jar" | head -1)
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp "$AUTH_JAR" /app/auth-api/auth-api.jar
           
           # Docs API
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./docs-api/gradlew -p ./docs-api build -x test
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./docs-api/gradlew -p ./docs-api clean build -x test
           DOCS_JAR=$(echo "${{ secrets.SSH_PASSWORD }}" | sudo -S find ./docs-api/build/libs/ -name "*.jar" | head -1)
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp "$DOCS_JAR" /app/docs-api/docs-api.jar
           
           # API Gateway
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./api-gateway/gradlew -p ./api-gateway build -x test
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./api-gateway/gradlew -p ./api-gateway clean build -x test
           GATEWAY_JAR=$(echo "${{ secrets.SSH_PASSWORD }}" | sudo -S find ./api-gateway/build/libs/ -name "*.jar" | head -1)
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp "$GATEWAY_JAR" /app/api-gateway/api-gateway.jar
           
