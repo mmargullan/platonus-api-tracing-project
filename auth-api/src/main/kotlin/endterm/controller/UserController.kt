@@ -5,7 +5,6 @@ import endterm.model.Dto.Filter
 import endterm.model.User
 import endterm.service.UserService
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController

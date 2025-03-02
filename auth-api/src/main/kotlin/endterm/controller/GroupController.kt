@@ -3,22 +3,20 @@ package endterm.controller
 import endterm.model.Group
 import endterm.model.User
 import endterm.service.GroupService
-import endterm.service.UserService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("group")
+@RequestMapping("/group")
 class GroupController(
-    private val userService: UserService,
     private val groupService: GroupService,
 ) {
 
-    @GetMapping("/getAll")
-    fun getAll(): List<Group> {
-        return groupService.getAll()
+    @GetMapping("/getAllGroups")
+    fun getAllGroups(): List<Group> {
+        return groupService.getAllGroups()
     }
 
     @GetMapping("/getGroupById/{groupId}")
