@@ -16,23 +16,23 @@ jobs:
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          
           ssh-keyscan -p 17853 -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Build JAR files
+      - name: Deploy to Server
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -p 17853 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          cd /home/ubuntu/deploy
-          git pull origin main
           
-          export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-          cd /auth-api && ./gradlew build -x test && cp build/libs/*.jar /app/auth-api/auth-api.jar
-          cd /docs-api && ./gradlew build -x test && cp build/libs/*.jar /app/docs-api/docs-api.jar
-          cd /api-gateway && ./gradlew build -x test && cp build/libs/*.jar /app/api-gateway/api-gateway.jar
+          git pull origin main
 
-          sudo systemctl restart auth-api
-          sudo systemctl restart docs-api
-          sudo systemctl restart api-gateway
+          export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+          
+          ./auth-api/gradlew -p ./auth-api build -x test && cp ./auth-api/build/libs/*.jar /app/auth-api/auth-api.jar
+          ./docs-api/gradlew -p ./docs-api build -x test && cp ./docs-api/build/libs/*.jar /app/docs-api/docs-api.jar
+          ./api-gateway/gradlew -p ./api-gateway build -x test && cp ./api-gateway/build/libs/*.jar /app/api-gateway/api-gateway.jar
+
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl reread
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl update
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl restart all
           EOF
