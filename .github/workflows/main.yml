@@ -27,15 +27,15 @@ jobs:
           
           sudo chmod +x ./auth-api/gradlew ./docs-api/gradlew ./api-gateway/gradlew
           
-          ./auth-api/gradlew -p ./auth-api build -x test
+          ./auth-api/gradlew -p ./auth-api clean build -x test
           sudo mkdir -p /app/auth-api
           sudo cp -f ./auth-api/build/libs/*.jar /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
           
-          ./docs-api/gradlew -p ./docs-api build -x test
+          ./docs-api/gradlew -p ./docs-api clean build -x test
           sudo mkdir -p /app/docs-api
           sudo cp -f ./docs-api/build/libs/*.jar /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
           
-          ./api-gateway/gradlew -p ./api-gateway build -x test
+          ./api-gateway/gradlew -p ./api-gateway clean build -x test
           sudo mkdir -p /app/api-gateway
           sudo cp -f ./api-gateway/build/libs/*.jar /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
           
