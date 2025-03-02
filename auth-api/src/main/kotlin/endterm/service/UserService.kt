@@ -3,6 +3,7 @@ package endterm.service
 import endterm.config.JwtTokenUtil
 import endterm.exception.CustomException
 import endterm.model.Dto.AuthHttpMessage
+import endterm.model.Dto.Filter
 import endterm.model.Dto.PersonIdResponse
 import endterm.model.Dto.UserInfoResponse
 import endterm.model.Group
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.util.*
 import javax.transaction.Transactional
 
 @Service
@@ -54,6 +56,7 @@ class UserService(
                 this.personId = student.personID
                 this.firstName = student.firstnameEN
                 this.lastName = student.lastnameEN
+                this.fullName = "$student.firstnameEN $student.lastnameEN"
                 this.gpa = student.GPA
                 this.phone = student.mobilePhone
                 this.groupName = student.groupName
@@ -99,15 +102,25 @@ class UserService(
         return userRepository.findAll()
     }
 
-    fun getUser(): ResponseEntity<Any> {
+    fun getUsersFiltered(filter: Filter): ResponseEntity<Any> {
         try{
-            val username = tokenService.username
-            val user = userRepository.findByLogin(username!!)
-            return ResponseEntity.ok().body(user)
+            val users = userRepository.getUsersFiltered(filter)
+
+            val response = mapOf(
+                "users" to users,
+                "count" to users.count()
+            )
+
+            return ResponseEntity.ok(response)
         } catch (e: Exception){
-            logger.error("Error in getUser: ", e)
-            throw CustomException("Error in getUser")
+            logger.error("Error in getUserFiltered: ", e)
+            throw CustomException("Error in getUserFiltered")
         }
+    }
+
+    fun getUser(): User? {
+        val user = userRepository.findByLogin(tokenService.username!!)
+        return user
     }
 
 }
