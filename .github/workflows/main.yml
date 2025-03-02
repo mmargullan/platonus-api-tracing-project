@@ -1,37 +1,38 @@
 name: Deploy to Server
-
 on:
   push:
     branches:
       - main  # Деплой при пуше в main
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -p 17853 -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-
       - name: Deploy to Server
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -p 17853 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          cd /deploy/platonus-api-tracing-project
           
-          git pull origin main
-
+          sudo -S git fetch origin
+          sudo -S git reset --hard origin/main
+          
           export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+          
+          chmod +x ./auth-api/gradlew
+          chmod +x ./docs-api/gradlew
+          chmod +x ./api-gateway/gradlew
           
           ./auth-api/gradlew -p ./auth-api build -x test && cp ./auth-api/build/libs/*.jar /app/auth-api/auth-api.jar
           ./docs-api/gradlew -p ./docs-api build -x test && cp ./docs-api/build/libs/*.jar /app/docs-api/docs-api.jar
           ./api-gateway/gradlew -p ./api-gateway build -x test && cp ./api-gateway/build/libs/*.jar /app/api-gateway/api-gateway.jar
-
+          
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl reread
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl update
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl restart all
