@@ -56,7 +56,7 @@ class UserService(
                 this.personId = student.personID
                 this.firstName = student.firstnameEN
                 this.lastName = student.lastnameEN
-                this.fullName = "$student.firstnameEN $student.lastnameEN"
+                this.fullName = student.firstnameEN + " " + student.lastnameEN
                 this.gpa = student.GPA
                 this.phone = student.mobilePhone
                 this.groupName = student.groupName

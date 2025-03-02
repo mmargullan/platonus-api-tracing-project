@@ -35,11 +35,13 @@ class CustomUserRepositoryImpl(
             sql.append(" AND group_name LIKE :groupName")
             params["groupName"] = "%$it%"
         }
-        val bool = filter.name?.trim()?.contains(" ")
-        filter.name?.let {
-            sql.append(" AND first_name LIKE :name")
-            sql.append(" AND last_name LIKE :name")
-            params["name"] = "%$it%"
+        val name = filter.name?.trim()
+        if (name != null && name.contains(" ")) {
+            sql.append(" AND full_name LIKE :name")
+            params["name"] = "%$name%"
+        } else if (name != null) {
+            sql.append(" AND (first_name LIKE :name OR last_name LIKE :name)")
+            params["name"] = "%$name%"
         }
         filter.courseNumber?.let {
             sql.append(" AND course_number = :courseNumber")
