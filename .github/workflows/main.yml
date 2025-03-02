@@ -18,21 +18,20 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          
+          ssh-keyscan -p 17853 -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Build JAR files
         run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -p 17853 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
           cd /home/ubuntu/deploy
           git pull origin main
           
-          # Сборка с Java 8
           export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
           cd auth-api && ./gradlew build -x test && cp build/libs/*.jar /home/ubuntu/auth-api/auth-api.jar
           cd ../docs-api && ./gradlew build -x test && cp build/libs/*.jar /home/ubuntu/docs-api/docs-api.jar
           cd ../api-gateway && ./gradlew build -x test && cp build/libs/*.jar /home/ubuntu/api-gateway/api-gateway.jar
 
-          # Перезапуск сервисов
           sudo systemctl restart auth-api
           sudo systemctl restart docs-api
           sudo systemctl restart api-gateway
