@@ -1,0 +1,39 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main  # Деплой при пуше в main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Build JAR files
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          cd /home/ubuntu/deploy
+          git pull origin main
+          
+          # Сборка с Java 8
+          export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+          cd auth-api && ./gradlew build -x test && cp build/libs/*.jar /home/ubuntu/auth-api/auth-api.jar
+          cd ../docs-api && ./gradlew build -x test && cp build/libs/*.jar /home/ubuntu/docs-api/docs-api.jar
+          cd ../api-gateway && ./gradlew build -x test && cp build/libs/*.jar /home/ubuntu/api-gateway/api-gateway.jar
+
+          # Перезапуск сервисов
+          sudo systemctl restart auth-api
+          sudo systemctl restart docs-api
+          sudo systemctl restart api-gateway
+          EOF
