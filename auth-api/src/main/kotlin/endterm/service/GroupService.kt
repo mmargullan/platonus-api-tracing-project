@@ -14,7 +14,7 @@ class GroupService(
     private val tokenService: TokenService
 ) {
 
-    fun getAll(): List<Group> {
+    fun getAllGroups(): List<Group> {
         return groupRepository.findAll()
     }
 
