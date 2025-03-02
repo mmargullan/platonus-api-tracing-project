@@ -40,4 +40,4 @@ out/
 .kotlin
 
 application.properties
-deploy.sh
+deploy-docs.sh
