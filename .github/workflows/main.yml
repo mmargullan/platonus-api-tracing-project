@@ -18,19 +18,15 @@ jobs:
       - name: Deploy to Server
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -p 17853 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          # Переход в проект
           cd /deploy/platonus-api-tracing-project || exit 1
           
-          # Обновление репозитория
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S git fetch origin
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S git reset --hard origin/main
-          
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chown -R $USER:$USER /deploy/platonus-api-tracing-project
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod -R 777 /deploy/platonus-api-tracing-project
+
           export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
           
-          # Даем права на выполнение gradlew
           sudo chmod +x ./auth-api/gradlew ./docs-api/gradlew ./api-gateway/gradlew
           
-          # Сборка и копирование артефактов
           ./auth-api/gradlew -p ./auth-api build -x test
           sudo mkdir -p /app/auth-api
           sudo mv -f ./auth-api/build/libs/*.jar /app/auth-api/auth-api.jar
@@ -43,8 +39,8 @@ jobs:
           sudo mkdir -p /app/api-gateway
           sudo mv -f ./api-gateway/build/libs/*.jar /app/api-gateway/api-gateway.jar
           
-          # Перезапуск Supervisor
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl reread
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl update
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl restart all
           EOF
+
