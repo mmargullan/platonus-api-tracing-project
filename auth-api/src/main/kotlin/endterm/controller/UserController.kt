@@ -19,7 +19,6 @@ class UserController(
         return userService.getAuthenticated(user.login, user.password)
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/getAll")
     fun getAll(): List<User> {
         return userService.getAll()
