@@ -28,6 +28,9 @@ class User {
     var lastName: String? = null
 
     @Column
+    var fullName: String? = null
+
+    @Column
     var personId: Long? = null
 
     @Column

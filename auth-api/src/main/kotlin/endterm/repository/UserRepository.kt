@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
-interface UserRepository: JpaRepository<User, Long> {
+interface UserRepository: JpaRepository<User, Long>, CustomUserRepository {
 
     fun findByPersonId(personId: Long): User?
     fun countUsersByGroupId(groupId: Long): Long

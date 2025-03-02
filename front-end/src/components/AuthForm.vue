@@ -21,7 +21,7 @@ const handleSubmit = async () => {
   isLoading.value = true;
 
   try {
-    const response = await fetch("http://test.studforum/api/auth-api/user/login", {
+    const response = await fetch("https://b8f2-37-99-49-122.ngrok-free.app/api/auth-api/user/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

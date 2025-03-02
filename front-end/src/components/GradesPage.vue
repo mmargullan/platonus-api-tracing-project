@@ -94,7 +94,7 @@ const fetchGrades = async () => {
       return;
     }
 
-    const response = await axios.get('http://test.studforum/api/auth-api/grades/getGrades', {
+    const response = await axios.get('https://b8f2-37-99-49-122.ngrok-free.app/api/auth-api/grades/getGrades', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
