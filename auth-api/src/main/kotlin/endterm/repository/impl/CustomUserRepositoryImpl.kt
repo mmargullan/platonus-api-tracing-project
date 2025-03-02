@@ -37,12 +37,17 @@ class CustomUserRepositoryImpl(
         }
         val name = filter.name?.trim()
         if (name != null && name.contains(" ")) {
-            sql.append(" AND full_name LIKE :name")
-            params["name"] = "%$name%"
+            val parts = name.split("\\s+".toRegex(), 2)
+            val first = parts[0]
+            val last = parts[1]
+            sql.append(" AND (full_name LIKE :name1 OR full_name LIKE :name2)")
+            params["name1"] = "%$first $last%"
+            params["name2"] = "%$last $first%"
         } else if (name != null) {
             sql.append(" AND (first_name LIKE :name OR last_name LIKE :name)")
             params["name"] = "%$name%"
         }
+
         filter.courseNumber?.let {
             sql.append(" AND course_number = :courseNumber")
             params["courseNumber"] = it

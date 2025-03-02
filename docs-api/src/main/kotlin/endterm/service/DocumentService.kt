@@ -103,7 +103,6 @@ class DocumentService(
                 throw RuntimeException("PDF file was not created")
             }
             val targetPdfFile = Paths.get(templateDir, "${tokenService.firstName}_resume.pdf").toFile()
-
             actualPdfFile.copyTo(targetPdfFile, overwrite = true)
             logger.info("PDF saved to: ${targetPdfFile.absolutePath}")
 

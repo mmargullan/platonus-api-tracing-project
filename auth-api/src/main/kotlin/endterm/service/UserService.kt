@@ -102,15 +102,13 @@ class UserService(
         return userRepository.findAll()
     }
 
-    fun getUsersFiltered(filter: Filter): ResponseEntity<Any> {
+    fun getUsersByFilter(filter: Filter): ResponseEntity<Any> {
         try{
             val users = userRepository.getUsersFiltered(filter)
-
             val response = mapOf(
                 "users" to users,
                 "count" to users.count()
             )
-
             return ResponseEntity.ok(response)
         } catch (e: Exception){
             logger.error("Error in getUserFiltered: ", e)
@@ -120,7 +118,11 @@ class UserService(
 
     fun getUser(): User? {
         val user = userRepository.findByLogin(tokenService.username!!)
-        return user
+        if (user != null){
+            return user
+        } else {
+            throw CustomException("No user found")
+        }
     }
 
 }

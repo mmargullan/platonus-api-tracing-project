@@ -24,9 +24,9 @@ class UserController(
         return userService.getAll()
     }
 
-    @GetMapping("/getUsersFiltered")
-    fun getUsersFiltered(@RequestBody filter: Filter): ResponseEntity<Any> {
-        return userService.getUsersFiltered(filter)
+    @GetMapping("/getUsersByFilter")
+    fun getUsersByFilter(@RequestBody filter: Filter): ResponseEntity<Any> {
+        return userService.getUsersByFilter(filter)
     }
 
     @GetMapping("/getUser")
