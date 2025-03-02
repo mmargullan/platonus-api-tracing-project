@@ -36,19 +36,19 @@ jobs:
           # Auth API
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./auth-api/gradlew -p ./auth-api clean build -x test
           AUTH_JAR=$(echo "${{ secrets.SSH_PASSWORD }}" | sudo -S find ./auth-api/build/libs/ -name "*.jar" | head -1)
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp "$AUTH_JAR" /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./auth-api/build/libs/auth-api-0.0.1-SNAPSHOT.jar /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod 777 /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
           
           # Docs API
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./docs-api/gradlew -p ./docs-api clean build -x test
           DOCS_JAR=$(echo "${{ secrets.SSH_PASSWORD }}" | sudo -S find ./docs-api/build/libs/ -name "*.jar" | head -1)
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp "$DOCS_JAR" /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./docs-api/build/libs/docs-api-0.0.1-SNAPSHOT.jar /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod 777 /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
           
           # API Gateway
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./api-gateway/gradlew -p ./api-gateway clean build -x test
           GATEWAY_JAR=$(echo "${{ secrets.SSH_PASSWORD }}" | sudo -S find ./api-gateway/build/libs/ -name "*.jar" | head -1)
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp "$GATEWAY_JAR" /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./api-gateway/build/libs/api-gateway-0.0.1-SNAPSHOT.jar /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod 777 /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
           
           # Перезапускаем сервисы
