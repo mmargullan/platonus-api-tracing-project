@@ -56,6 +56,9 @@ class RestTemplateService() {
         val cookie: String?
     )
 
-    data class LoginRequest(val login: String, val password: String)
+    data class LoginRequest(
+        val login: String,
+        val password: String
+    )
 
 }
