@@ -34,13 +34,13 @@ jobs:
           
           # Запускаем gradlew с sudo
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./auth-api/gradlew -p ./auth-api build -x test
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./auth-api/build/libs/*.jar /app/auth-api/auth-api.jar
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./auth-api/build/libs/*.jar /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
           
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./docs-api/gradlew -p ./docs-api build -x test
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./docs-api/build/libs/*.jar /app/docs-api/docs-api.jar
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./docs-api/build/libs/*.jar /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
           
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./api-gateway/gradlew -p ./api-gateway build -x test
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./api-gateway/build/libs/*.jar /app/api-gateway/api-gateway.jar
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./api-gateway/build/libs/*.jar /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
           
           # Перезапускаем сервисы
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl reread
