@@ -2,7 +2,7 @@ name: Deploy to Server
 on:
   push:
     branches:
-      - main
+      - main  # Деплой при пуше в main
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -18,29 +18,38 @@ jobs:
       - name: Deploy to Server
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -p 17853 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          cd /deploy/platonus-api-tracing-project || exit 1
+          # Переходим в директорию проекта
+          cd /deploy/platonus-api-tracing-project
           
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chown -R $USER:$USER /deploy/platonus-api-tracing-project
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod -R 777 /deploy/platonus-api-tracing-project
-
+          # Используем правильный формат для передачи пароля в sudo
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S git fetch origin
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S git reset --hard origin/main
+          
           export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
           
-          sudo chmod +x ./auth-api/gradlew ./docs-api/gradlew ./api-gateway/gradlew
+          # Изменяем права с sudo
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod +x ./auth-api/gradlew
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod +x ./docs-api/gradlew
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod +x ./api-gateway/gradlew
           
-          ./auth-api/gradlew -p ./auth-api clean build -x test
-          sudo mkdir -p /app/auth-api
-          sudo cp -f ./auth-api/build/libs/*.jar /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
+          # Запускаем gradlew с sudo и перемещаем файлы
+          # Auth API
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./auth-api/gradlew -p ./auth-api build -x test
+          AUTH_JAR=$(echo "${{ secrets.SSH_PASSWORD }}" | sudo -S find ./auth-api/build/libs/ -name "*.jar" | head -1)
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp "$AUTH_JAR" /app/auth-api/auth-api.jar
           
-          ./docs-api/gradlew -p ./docs-api clean build -x test
-          sudo mkdir -p /app/docs-api
-          sudo cp -f ./docs-api/build/libs/*.jar /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
+          # Docs API
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./docs-api/gradlew -p ./docs-api build -x test
+          DOCS_JAR=$(echo "${{ secrets.SSH_PASSWORD }}" | sudo -S find ./docs-api/build/libs/ -name "*.jar" | head -1)
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp "$DOCS_JAR" /app/docs-api/docs-api.jar
           
-          ./api-gateway/gradlew -p ./api-gateway clean build -x test
-          sudo mkdir -p /app/api-gateway
-          sudo cp -f ./api-gateway/build/libs/*.jar /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
+          # API Gateway
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./api-gateway/gradlew -p ./api-gateway build -x test
+          GATEWAY_JAR=$(echo "${{ secrets.SSH_PASSWORD }}" | sudo -S find ./api-gateway/build/libs/ -name "*.jar" | head -1)
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp "$GATEWAY_JAR" /app/api-gateway/api-gateway.jar
           
+          # Перезапускаем сервисы
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl reread
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl update
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl restart all
           EOF
-
