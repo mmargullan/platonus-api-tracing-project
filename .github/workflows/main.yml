@@ -18,21 +18,31 @@ jobs:
       - name: Deploy to Server
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -p 17853 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          # Переходим в директорию проекта
           cd /deploy/platonus-api-tracing-project
           
-          sudo -S git fetch origin
-          sudo -S git reset --hard origin/main
+          # Используем правильный формат для передачи пароля в sudo
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S git fetch origin
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S git reset --hard origin/main
           
           export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
           
-          chmod +x ./auth-api/gradlew
-          chmod +x ./docs-api/gradlew
-          chmod +x ./api-gateway/gradlew
+          # Изменяем права с sudo
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod +x ./auth-api/gradlew
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod +x ./docs-api/gradlew
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod +x ./api-gateway/gradlew
           
-          ./auth-api/gradlew -p ./auth-api build -x test && cp ./auth-api/build/libs/*.jar /app/auth-api/auth-api.jar
-          ./docs-api/gradlew -p ./docs-api build -x test && cp ./docs-api/build/libs/*.jar /app/docs-api/docs-api.jar
-          ./api-gateway/gradlew -p ./api-gateway build -x test && cp ./api-gateway/build/libs/*.jar /app/api-gateway/api-gateway.jar
+          # Запускаем gradlew с sudo
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./auth-api/gradlew -p ./auth-api build -x test
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./auth-api/build/libs/*.jar /app/auth-api/auth-api.jar
           
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./docs-api/gradlew -p ./docs-api build -x test
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./docs-api/build/libs/*.jar /app/docs-api/docs-api.jar
+          
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./api-gateway/gradlew -p ./api-gateway build -x test
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./api-gateway/build/libs/*.jar /app/api-gateway/api-gateway.jar
+          
+          # Перезапускаем сервисы
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl reread
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl update
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl restart all
