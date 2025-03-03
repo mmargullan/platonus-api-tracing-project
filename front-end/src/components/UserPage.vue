@@ -82,7 +82,7 @@ const fetchUserInfo = async () => {
       return;
     }
 
-    const response = await fetch("https://2bbc-37-99-48-152.ngrok-free.app/api/auth-api/user/getUser", {
+    const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/auth-api/user/getUser`, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${token}`,
