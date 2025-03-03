@@ -94,7 +94,7 @@ const fetchGrades = async () => {
       return;
     }
 
-    const response = await axios.get('https://b8f2-37-99-49-122.ngrok-free.app/api/auth-api/grades/getGrades?year=2024&semester=1', {
+    const response = await axios.get(`${process.env.VUE_APP_BASE_URL}/api/auth-api/grades/getGrades?year=2024&semester=1`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
