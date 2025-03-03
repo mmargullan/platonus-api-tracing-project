@@ -26,27 +26,33 @@ jobs:
           ls -la
           ls -la front-end/ || echo "front-end directory not found"
           ls -la front-end/dist/ || echo "dist directory not found"
-          
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
+      
+      # Use the official GitHub Action for SSH
+      - name: Install SSH Key
+        uses: webfactory/ssh-agent@v0.8.0
         with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known_hosts: unnecessary
-          if_key_exists: replace
-          
-      - name: Adding Known Hosts
-        run: ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-        
-      - name: Sync frontend build to server
-        run: |
-          # Use rsync to transfer frontend build files directly to server
-          rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }}" ./front-end/dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/front-end-dist/
-          
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      
+      # Skip known_hosts check for troubleshooting
       - name: Deploy to Server
         run: |
-          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          # Try connecting with verbose output and StrictHostKeyChecking disabled
+          ssh -v -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
           # Navigate to project directory
           cd /deploy/platonus-api-tracing-project
+          
+          # Build frontend locally on the server
+          cd front-end
+          npm install
+          npm run build
+          
+          # Now copy the locally built frontend to the deployment location
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S rm -rf /app/main-ui/*  # Remove old files
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp -r dist/* /app/main-ui/
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod -R 755 /app/main-ui/
+          
+          # Go back to project root
+          cd ..
           
           # Git operations
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S git fetch origin
@@ -73,11 +79,6 @@ jobs:
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./api-gateway/gradlew -p ./api-gateway clean build -x test
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./api-gateway/build/libs/api-gateway-0.0.1-SNAPSHOT.jar /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod 777 /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
-          
-          # Deploy frontend from the temporary location
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S rm -rf /app/main-ui/*  # Remove old files
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp -r /tmp/front-end-dist/* /app/main-ui/
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod -R 755 /app/main-ui/
           
           # Restart services
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl reread
