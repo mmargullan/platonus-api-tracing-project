@@ -9,6 +9,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Build Frontend
+        run: |
+          cd front-end
+          npm install
+          npm run build
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
@@ -50,6 +55,11 @@ jobs:
           GATEWAY_JAR=$(echo "${{ secrets.SSH_PASSWORD }}" | sudo -S find ./api-gateway/build/libs/ -name "*.jar" | head -1)
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./api-gateway/build/libs/api-gateway-0.0.1-SNAPSHOT.jar /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod 777 /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
+
+          # Front-End
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S rm -rf /app/main-ui/*  # Удаляем старые файлы
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp -r ./front-end/dist/* /app/main-ui/
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod -R 755 /app/main-ui/
           
           # Перезапускаем сервисы
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl reread
