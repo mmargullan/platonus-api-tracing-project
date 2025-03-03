@@ -2,66 +2,84 @@ name: Deploy to Server
 on:
   push:
     branches:
-      - main  # Деплой при пуше в main
+      - main  # Deploy on push to main
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          
       - name: Build Frontend
         run: |
           cd front-end
           npm install
           npm run build
-      - name: Set up SSH
+          
+      - name: Debug directory structure
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p ${{secrets.SSH_PORT}} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          ls -la
+          ls -la front-end/ || echo "front-end directory not found"
+          ls -la front-end/dist/ || echo "dist directory not found"
+          
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: unnecessary
+          if_key_exists: replace
+          
+      - name: Adding Known Hosts
+        run: ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+        
+      - name: Sync frontend build to server
+        run: |
+          # Use rsync to transfer frontend build files directly to server
+          rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }}" ./front-end/dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/front-end-dist/
+          
       - name: Deploy to Server
         run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -p ${{secrets.SSH_PORT}} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          # Переходим в директорию проекта
+          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          # Navigate to project directory
           cd /deploy/platonus-api-tracing-project
           
-          # Используем правильный формат для передачи пароля в sudo
+          # Git operations
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S git fetch origin
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S git reset --hard origin/main
           
           export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
           
-          # Изменяем права с sudo
+          # Set execute permissions for Gradle wrappers
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod +x ./auth-api/gradlew
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod +x ./docs-api/gradlew
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod +x ./api-gateway/gradlew
           
-          # Запускаем gradlew с sudo и перемещаем файлы
-          # Auth API
+          # Build and deploy Auth API
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./auth-api/gradlew -p ./auth-api clean build -x test
-          AUTH_JAR=$(echo "${{ secrets.SSH_PASSWORD }}" | sudo -S find ./auth-api/build/libs/ -name "*.jar" | head -1)
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./auth-api/build/libs/auth-api-0.0.1-SNAPSHOT.jar /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod 777 /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
           
-          # Docs API
+          # Build and deploy Docs API
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./docs-api/gradlew -p ./docs-api clean build -x test
-          DOCS_JAR=$(echo "${{ secrets.SSH_PASSWORD }}" | sudo -S find ./docs-api/build/libs/ -name "*.jar" | head -1)
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./docs-api/build/libs/docs-api-0.0.1-SNAPSHOT.jar /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod 777 /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
           
-          # API Gateway
+          # Build and deploy API Gateway
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./api-gateway/gradlew -p ./api-gateway clean build -x test
-          GATEWAY_JAR=$(echo "${{ secrets.SSH_PASSWORD }}" | sudo -S find ./api-gateway/build/libs/ -name "*.jar" | head -1)
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./api-gateway/build/libs/api-gateway-0.0.1-SNAPSHOT.jar /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod 777 /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
-
-          # Front-End
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S rm -rf /app/main-ui/*  # Удаляем старые файлы
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp -r ./front-end/dist/* /app/main-ui/
+          
+          # Deploy frontend from the temporary location
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S rm -rf /app/main-ui/*  # Remove old files
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp -r /tmp/front-end-dist/* /app/main-ui/
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod -R 755 /app/main-ui/
           
-          # Перезапускаем сервисы
+          # Restart services
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl reread
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl update
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl restart all
