@@ -94,7 +94,7 @@ const fetchGrades = async () => {
       return;
     }
 
-    const response = await axios.get('http://test.studforum/api/auth-api/grades/getGrades', {
+    const response = await axios.get(`${process.env.VUE_APP_BASE_URL}/api/auth-api/grades/getGrades`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

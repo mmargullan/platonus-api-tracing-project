@@ -82,7 +82,7 @@ const fetchUserInfo = async () => {
       return;
     }
 
-    const response = await fetch("http://test.studforum/api/auth-api/user/getUserInfo", {
+    const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/auth-api/user/getUser`, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${token}`,
