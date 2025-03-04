@@ -3,45 +3,86 @@ on:
   push:
     branches:
       - main
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
-      - name: Debug SSH Key Secrets
+
+      - name: Build Frontend
         run: |
-          echo "SSH Host: ${{ secrets.SSH_HOST }}"
-          echo "SSH Port: ${{ secrets.SSH_PORT }}"
-          echo "SSH User: ${{ secrets.SSH_USER }}"
-          # Маскируем приватный ключ
-          echo "SSH Private Key length: ${#SSH_PRIVATE_KEY}"
+          cd front-end
+          npm install
+          npm run build
         shell: bash
-      
+
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          
-          # Подробная диагностика ключа
-          ls -l ~/.ssh/id_rsa
-          file ~/.ssh/id_rsa
-          cat ~/.ssh/id_rsa
-          
-          # Попробуем альтернативные методы проверки
-          ssh-keygen -y -f ~/.ssh/id_rsa || echo "Key validation failed"
-          ssh-keygen -l -f ~/.ssh/id_rsa || echo "Key generation check failed"
+          ssh-keyscan -p ${{secrets.SSH_PORT}} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
         shell: bash
-      
+
       - name: Verify SSH Connection
         run: |
-          # Максимально подробное подключение
-          ssh -vvv -i ~/.ssh/id_rsa \
+          ssh -v -i ~/.ssh/id_rsa \
               -o StrictHostKeyChecking=no \
-              -o UserKnownHostsFile=/dev/null \
               -p ${{secrets.SSH_PORT}} \
               ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
               "whoami && pwd && uname -a"
         shell: bash
+
+      - name: Deploy to Server
+        run: |
+          ssh -i ~/.ssh/id_rsa \
+              -o StrictHostKeyChecking=no \
+              -p ${{secrets.SSH_PORT}} \
+              ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          set -x  # Enable debug mode
+          
+          # Navigate to project directory
+          cd /deploy/platonus-api-tracing-project
+          
+          # Update project
+          git fetch origin
+          git reset --hard origin/main
+          
+          # Set Java environment
+          export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+          
+          # Make gradlew executable
+          chmod +x ./auth-api/gradlew
+          chmod +x ./docs-api/gradlew
+          chmod +x ./api-gateway/gradlew
+          
+          # Build and deploy services
+          # Auth API
+          ./auth-api/gradlew -p ./auth-api clean build -x test
+          cp ./auth-api/build/libs/auth-api-0.0.1-SNAPSHOT.jar /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
+          chmod 777 /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
+          
+          # Docs API
+          ./docs-api/gradlew -p ./docs-api clean build -x test
+          cp ./docs-api/build/libs/docs-api-0.0.1-SNAPSHOT.jar /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
+          chmod 777 /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
+          
+          # API Gateway
+          ./api-gateway/gradlew -p ./api-gateway clean build -x test
+          cp ./api-gateway/build/libs/api-gateway-0.0.1-SNAPSHOT.jar /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
+          chmod 777 /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
+          
+          # Front-End
+          rm -rf /app/main-ui/*
+          cp -r ./front-end/dist/* /app/main-ui/
+          chmod -R 755 /app/main-ui/
+          
+          # Restart services
+          supervisorctl reread
+          supervisorctl update
+          supervisorctl restart all
+          EOF
+        shell: bash
+  
