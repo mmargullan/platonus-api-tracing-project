@@ -45,6 +45,10 @@ jobs:
           
           # Navigate to project directory
           cd /deploy/platonus-api-tracing-project
+
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S rm -rf ./auth-api/build
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S rm -rf ./docs-api/build
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S rm -rf ./api-gateway/build
           
           # Update project
           git fetch origin
@@ -60,17 +64,17 @@ jobs:
           
           # Build and deploy services
           # Auth API
-          ./auth-api/gradlew -p ./auth-api clean build -x test
+          ./auth-api/gradlew -p ./auth-api build -x test
           cp ./auth-api/build/libs/auth-api-0.0.1-SNAPSHOT.jar /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
           chmod 777 /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
           
           # Docs API
-          ./docs-api/gradlew -p ./docs-api clean build -x test
+          ./docs-api/gradlew -p ./docs-api build -x test
           cp ./docs-api/build/libs/docs-api-0.0.1-SNAPSHOT.jar /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
           chmod 777 /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
           
           # API Gateway
-          ./api-gateway/gradlew -p ./api-gateway clean build -x test
+          ./api-gateway/gradlew -p ./api-gateway build -x test
           cp ./api-gateway/build/libs/api-gateway-0.0.1-SNAPSHOT.jar /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
           chmod 777 /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
           
