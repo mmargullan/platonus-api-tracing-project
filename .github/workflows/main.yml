@@ -25,12 +25,14 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           
-          # Подробный вывод для диагностики
+          # Подробная диагностика ключа
           ls -l ~/.ssh/id_rsa
           file ~/.ssh/id_rsa
+          cat ~/.ssh/id_rsa
           
-          ssh-keyscan -p ${{secrets.SSH_PORT}} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-          ssh-keygen -l -f ~/.ssh/id_rsa || echo "SSH key generation check failed"
+          # Попробуем альтернативные методы проверки
+          ssh-keygen -y -f ~/.ssh/id_rsa || echo "Key validation failed"
+          ssh-keygen -l -f ~/.ssh/id_rsa || echo "Key generation check failed"
         shell: bash
       
       - name: Verify SSH Connection
