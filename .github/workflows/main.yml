@@ -3,89 +3,43 @@ on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Build Frontend
+      
+      - name: Debug SSH Key Secrets
         run: |
-          cd front-end
-          npm install
-          npm run build
+          echo "SSH Host: ${{ secrets.SSH_HOST }}"
+          echo "SSH Port: ${{ secrets.SSH_PORT }}"
+          echo "SSH User: ${{ secrets.SSH_USER }}"
+          # Маскируем приватный ключ
+          echo "SSH Private Key length: ${#SSH_PRIVATE_KEY}"
         shell: bash
-
+      
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          
+          # Подробный вывод для диагностики
+          ls -l ~/.ssh/id_rsa
+          file ~/.ssh/id_rsa
+          
           ssh-keyscan -p ${{secrets.SSH_PORT}} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-          ssh-keygen -l -f ~/.ssh/id_rsa || echo "SSH key generation failed"
+          ssh-keygen -l -f ~/.ssh/id_rsa || echo "SSH key generation check failed"
         shell: bash
-
+      
       - name: Verify SSH Connection
         run: |
-          ssh -v -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -p ${{secrets.SSH_PORT}} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "whoami && pwd"
+          # Максимально подробное подключение
+          ssh -vvv -i ~/.ssh/id_rsa \
+              -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -p ${{secrets.SSH_PORT}} \
+              ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+              "whoami && pwd && uname -a"
         shell: bash
-
-      - name: Deploy to Server
-        run: |
-          ssh -v -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -p ${{secrets.SSH_PORT}} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          set -x  # Enable debug mode
-          
-          # Check current directory and user
-          pwd
-          whoami
-          
-          # Validate project directory exists
-          if [ ! -d "/deploy/platonus-api-tracing-project" ]; then
-            echo "Project directory does not exist"
-            exit 1
-          fi
-          
-          cd /deploy/platonus-api-tracing-project
-          
-          # Detailed git operations with error checking
-          sudo git fetch origin || { echo "Git fetch failed"; exit 1; }
-          sudo git reset --hard origin/main || { echo "Git reset failed"; exit 1; }
-          
-          # Set Java environment
-          export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-          
-          # Make gradlew executable with error checking
-          sudo chmod +x ./auth-api/gradlew || { echo "chmod failed for auth-api"; exit 1; }
-          sudo chmod +x ./docs-api/gradlew || { echo "chmod failed for docs-api"; exit 1; }
-          sudo chmod +x ./api-gateway/gradlew || { echo "chmod failed for api-gateway"; exit 1; }
-          
-          # Build and deploy each service with detailed logging
-          # Auth API
-          sudo ./auth-api/gradlew -p ./auth-api clean build -x test || { echo "Auth API build failed"; exit 1; }
-          sudo cp ./auth-api/build/libs/auth-api-0.0.1-SNAPSHOT.jar /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar || { echo "Auth API jar copy failed"; exit 1; }
-          sudo chmod 777 /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
-          
-          # Docs API
-          sudo ./docs-api/gradlew -p ./docs-api clean build -x test || { echo "Docs API build failed"; exit 1; }
-          sudo cp ./docs-api/build/libs/docs-api-0.0.1-SNAPSHOT.jar /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar || { echo "Docs API jar copy failed"; exit 1; }
-          sudo chmod 777 /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
-          
-          # API Gateway
-          sudo ./api-gateway/gradlew -p ./api-gateway clean build -x test || { echo "API Gateway build failed"; exit 1; }
-          sudo cp ./api-gateway/build/libs/api-gateway-0.0.1-SNAPSHOT.jar /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar || { echo "API Gateway jar copy failed"; exit 1; }
-          sudo chmod 777 /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
-          
-          # Front-End
-          sudo rm -rf /app/main-ui/*
-          sudo cp -r ./front-end/dist/* /app/main-ui/ || { echo "Frontend copy failed"; exit 1; }
-          sudo chmod -R 755 /app/main-ui/
-          
-          # Service restart
-          sudo supervisorctl reread
-          sudo supervisorctl update
-          sudo supervisorctl restart all
-          EOF
-        shell: bash
-        
