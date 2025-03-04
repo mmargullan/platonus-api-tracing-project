@@ -43,55 +43,61 @@ jobs:
               ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
           set -x  # Enable debug mode
           
+          # Функция для выполнения команд через sudo -S
+          run_with_sudo() {
+            echo "${{ secrets.SSH_PASSWORD }}" | sudo -S bash -c "$1"
+          }
+
           # Установка максимальных прав для директории проекта
-          sudo -S chown -R $USER:$USER /deploy/platonus-api-tracing-project
-          sudo -S chmod -R 777 /deploy/platonus-api-tracing-project
+          run_with_sudo "chown -R $USER:$USER /deploy/platonus-api-tracing-project"
+          run_with_sudo "chmod -R 777 /deploy/platonus-api-tracing-project"
           
           # Переход в директорию проекта
           cd /deploy/platonus-api-tracing-project
           
           # Очистка директорий сборки с максимальными правами
-          sudo -S rm -rf ./auth-api/build
-          sudo -S rm -rf ./docs-api/build
-          sudo -S rm -rf ./api-gateway/build
+          run_with_sudo "rm -rf ./auth-api/build"
+          run_with_sudo "rm -rf ./docs-api/build"
+          run_with_sudo "rm -rf ./api-gateway/build"
           
           # Обновление проекта с максимальными правами
-          sudo -S git config --global --add safe.directory /deploy/platonus-api-tracing-project
-          sudo -S git fetch origin
-          sudo -S git reset --hard origin/main
+          run_with_sudo "git config --global --add safe.directory /deploy/platonus-api-tracing-project"
+          run_with_sudo "git fetch origin"
+          run_with_sudo "git reset --hard origin/main"
           
           # Установка переменных окружения
           export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
           
-          # Установка прав на градлew
-          sudo -S chmod +x ./auth-api/gradlew
-          sudo -S chmod +x ./docs-api/gradlew
-          sudo -S chmod +x ./api-gateway/gradlew
+          # Установка прав на gradlew
+          run_with_sudo "chmod +x ./auth-api/gradlew"
+          run_with_sudo "chmod +x ./docs-api/gradlew"
+          run_with_sudo "chmod +x ./api-gateway/gradlew"
           
           # Сборка и деплой сервисов с максимальными правами
+          
           # Auth API
-          sudo -S ./auth-api/gradlew -p ./auth-api build -x test
-          sudo -S cp ./auth-api/build/libs/auth-api-0.0.1-SNAPSHOT.jar /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
-          sudo -S chmod 777 /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
+          run_with_sudo "./auth-api/gradlew -p ./auth-api build -x test"
+          run_with_sudo "cp ./auth-api/build/libs/auth-api-0.0.1-SNAPSHOT.jar /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar"
+          run_with_sudo "chmod 777 /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar"
           
           # Docs API
-          sudo -S ./docs-api/gradlew -p ./docs-api build -x test
-          sudo -S cp ./docs-api/build/libs/docs-api-0.0.1-SNAPSHOT.jar /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
-          sudo -S chmod 777 /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
+          run_with_sudo "./docs-api/gradlew -p ./docs-api build -x test"
+          run_with_sudo "cp ./docs-api/build/libs/docs-api-0.0.1-SNAPSHOT.jar /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar"
+          run_with_sudo "chmod 777 /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar"
           
           # API Gateway
-          sudo -S ./api-gateway/gradlew -p ./api-gateway build -x test
-          sudo -S cp ./api-gateway/build/libs/api-gateway-0.0.1-SNAPSHOT.jar /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
-          sudo -S chmod 777 /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
+          run_with_sudo "./api-gateway/gradlew -p ./api-gateway build -x test"
+          run_with_sudo "cp ./api-gateway/build/libs/api-gateway-0.0.1-SNAPSHOT.jar /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar"
+          run_with_sudo "chmod 777 /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar"
           
           # Front-End
-          sudo -S rm -rf /app/main-ui/*
-          sudo -S cp -r ./front-end/dist/* /app/main-ui/
-          sudo -S chmod -R 755 /app/main-ui/
+          run_with_sudo "rm -rf /app/main-ui/*"
+          run_with_sudo "cp -r ./front-end/dist/* /app/main-ui/"
+          run_with_sudo "chmod -R 755 /app/main-ui/"
           
           # Перезапуск сервисов
-          sudo -S supervisorctl reread
-          sudo -S supervisorctl update
-          sudo -S supervisorctl restart all
+          run_with_sudo "supervisorctl reread"
+          run_with_sudo "supervisorctl update"
+          run_with_sudo "supervisorctl restart all"
           EOF
         shell: bash
