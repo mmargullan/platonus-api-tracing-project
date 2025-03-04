@@ -1,4 +1,3 @@
-```yaml
 name: Deploy to Server
 on:
   push:
@@ -89,4 +88,4 @@ jobs:
           sudo supervisorctl restart all
           EOF
         shell: bash
-```
+        
