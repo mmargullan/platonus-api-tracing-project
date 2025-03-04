@@ -2,7 +2,8 @@ name: Deploy to Server
 on:
   push:
     branches:
-      - main  # Deploy on push to main
+      - main  # Деплой при пуше в main
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -27,60 +28,65 @@ jobs:
           ls -la front-end/ || echo "front-end directory not found"
           ls -la front-end/dist/ || echo "dist directory not found"
       
-      # Use the official GitHub Action for SSH
+      # Устанавливаем SSH-ключ
       - name: Install SSH Key
-        uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      
-      # Skip known_hosts check for troubleshooting
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      # Подключение к серверу и деплой
       - name: Deploy to Server
         run: |
-          # Try connecting with verbose output and StrictHostKeyChecking disabled
-          ssh -v -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          # Navigate to project directory
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          
+          # 1️⃣ Переходим в директорию проекта
           cd /deploy/platonus-api-tracing-project
           
-          # Build frontend locally on the server
-          cd front-end
-          npm install
-          npm run build
-          
-          # Now copy the locally built frontend to the deployment location
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S rm -rf /app/main-ui/*  # Remove old files
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp -r dist/* /app/main-ui/
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod -R 755 /app/main-ui/
-          
-          # Go back to project root
-          cd ..
-          
-          # Git operations
+          # 2️⃣ Обновляем репозиторий
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S git fetch origin
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S git reset --hard origin/main
           
+          # 3️⃣ Устанавливаем переменные среды
           export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
           
-          # Set execute permissions for Gradle wrappers
+          # 4️⃣ Ставим права на gradlew
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod +x ./auth-api/gradlew
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod +x ./docs-api/gradlew
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod +x ./api-gateway/gradlew
           
-          # Build and deploy Auth API
+          # 5️⃣ Сборка и деплой сервисов
+          
+          # Auth API
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./auth-api/gradlew -p ./auth-api clean build -x test
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./auth-api/build/libs/auth-api-0.0.1-SNAPSHOT.jar /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod 777 /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
+          AUTH_JAR=$(find ./auth-api/build/libs/ -name "*.jar" | head -1)
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp "$AUTH_JAR" /app/auth-api/auth-api.jar
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod 777 /app/auth-api/auth-api.jar
           
-          # Build and deploy Docs API
+          # Docs API
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./docs-api/gradlew -p ./docs-api clean build -x test
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./docs-api/build/libs/docs-api-0.0.1-SNAPSHOT.jar /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod 777 /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
+          DOCS_JAR=$(find ./docs-api/build/libs/ -name "*.jar" | head -1)
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp "$DOCS_JAR" /app/docs-api/docs-api.jar
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod 777 /app/docs-api/docs-api.jar
           
-          # Build and deploy API Gateway
+          # API Gateway
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S ./api-gateway/gradlew -p ./api-gateway clean build -x test
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp ./api-gateway/build/libs/api-gateway-0.0.1-SNAPSHOT.jar /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod 777 /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
+          GATEWAY_JAR=$(find ./api-gateway/build/libs/ -name "*.jar" | head -1)
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp "$GATEWAY_JAR" /app/api-gateway/api-gateway.jar
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod 777 /app/api-gateway/api-gateway.jar
           
-          # Restart services
+          # 6️⃣ Сборка фронта прямо на сервере
+          cd front-end
+          npm install
+          npm run build
+          
+          # 7️⃣ Копирование фронта
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S rm -rf /app/main-ui/*
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S cp -r dist/* /app/main-ui/
+          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chmod -R 777 /app/main-ui/
+          
+          # 8️⃣ Перезапуск Supervisor
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl reread
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl update
           echo "${{ secrets.SSH_PASSWORD }}" | sudo -S supervisorctl restart all
