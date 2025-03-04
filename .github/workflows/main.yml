@@ -43,50 +43,55 @@ jobs:
               ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
           set -x  # Enable debug mode
           
-          # Navigate to project directory
+          # Установка максимальных прав для директории проекта
+          sudo chown -R $USER:$USER /deploy/platonus-api-tracing-project
+          sudo chmod -R 777 /deploy/platonus-api-tracing-project
+          
+          # Переход в директорию проекта
           cd /deploy/platonus-api-tracing-project
-
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S rm -rf ./auth-api/build
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S rm -rf ./docs-api/build
-          echo "${{ secrets.SSH_PASSWORD }}" | sudo -S rm -rf ./api-gateway/build
           
-          # Update project
-          git fetch origin
-          git reset --hard origin/main
+          # Очистка директорий сборки с максимальными правами
+          sudo rm -rf ./auth-api/build
+          sudo rm -rf ./docs-api/build
+          sudo rm -rf ./api-gateway/build
           
-          # Set Java environment
+          # Обновление проекта с максимальными правами
+          sudo git config --global --add safe.directory /deploy/platonus-api-tracing-project
+          sudo git fetch origin
+          sudo git reset --hard origin/main
+          
+          # Установка переменных окружения
           export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
           
-          # Make gradlew executable
-          chmod +x ./auth-api/gradlew
-          chmod +x ./docs-api/gradlew
-          chmod +x ./api-gateway/gradlew
+          # Установка прав на градлew
+          sudo chmod +x ./auth-api/gradlew
+          sudo chmod +x ./docs-api/gradlew
+          sudo chmod +x ./api-gateway/gradlew
           
-          # Build and deploy services
+          # Сборка и деплой сервисов с максимальными правами
           # Auth API
-          ./auth-api/gradlew -p ./auth-api build -x test
-          cp ./auth-api/build/libs/auth-api-0.0.1-SNAPSHOT.jar /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
-          chmod 777 /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
+          sudo ./auth-api/gradlew -p ./auth-api build -x test
+          sudo cp ./auth-api/build/libs/auth-api-0.0.1-SNAPSHOT.jar /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
+          sudo chmod 777 /app/auth-api/auth-api-0.0.1-SNAPSHOT.jar
           
           # Docs API
-          ./docs-api/gradlew -p ./docs-api build -x test
-          cp ./docs-api/build/libs/docs-api-0.0.1-SNAPSHOT.jar /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
-          chmod 777 /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
+          sudo ./docs-api/gradlew -p ./docs-api build -x test
+          sudo cp ./docs-api/build/libs/docs-api-0.0.1-SNAPSHOT.jar /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
+          sudo chmod 777 /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar
           
           # API Gateway
-          ./api-gateway/gradlew -p ./api-gateway build -x test
-          cp ./api-gateway/build/libs/api-gateway-0.0.1-SNAPSHOT.jar /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
-          chmod 777 /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
+          sudo ./api-gateway/gradlew -p ./api-gateway build -x test
+          sudo cp ./api-gateway/build/libs/api-gateway-0.0.1-SNAPSHOT.jar /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
+          sudo chmod 777 /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar
           
           # Front-End
-          rm -rf /app/main-ui/*
-          cp -r ./front-end/dist/* /app/main-ui/
-          chmod -R 755 /app/main-ui/
+          sudo rm -rf /app/main-ui/*
+          sudo cp -r ./front-end/dist/* /app/main-ui/
+          sudo chmod -R 755 /app/main-ui/
           
-          # Restart services
-          supervisorctl reread
-          supervisorctl update
-          supervisorctl restart all
+          # Перезапуск сервисов
+          sudo supervisorctl reread
+          sudo supervisorctl update
+          sudo supervisorctl restart all
           EOF
         shell: bash
-  
