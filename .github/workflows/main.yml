@@ -8,16 +8,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Build Frontend
-        run: |
-          cd front-end
-          npm install
-          npm run build
-        shell: bash
-
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
@@ -54,6 +44,11 @@ jobs:
           
           # Переход в директорию проекта
           cd /deploy/platonus-api-tracing-project
+
+          cd front-end
+          npm install
+          npm run build
+          cd ..
           
           # Очистка директорий сборки с максимальными правами
           run_with_sudo "rm -rf ./auth-api/build"
