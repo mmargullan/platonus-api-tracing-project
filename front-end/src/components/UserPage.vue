@@ -6,40 +6,65 @@
       <div v-for="n in 100" :key="n" class="star" :style="getStarStyle()"></div>
     </div>
 
-    <!-- User Information Card -->
-    <div class="info-card">
-      <div class="info-section">
-        <h2 class="title animated-text">{{ userInfo.fullName }}</h2>
-        <p class="detail animated-text">
-          <strong>GPA:</strong>
-          <span>{{ userInfo.gpa }}</span>
-        </p>
-        <p class="detail animated-text">
-          <strong>Specialization:</strong>
-          <span>{{ userInfo.specializationName }}</span>
-        </p>
-        <p class="detail animated-text">
-          <strong>Course:</strong>
-          <span>{{ userInfo.courseNumber }}</span>
-        </p>
-        <!-- Информация о группе -->
-        <p class="detail animated-text">
-          <strong>Group:</strong>
-          <span>{{ userInfo.group?.name }}</span>
-        </p>
-        <p class="detail animated-text">
-          <strong>Students in group:</strong>
-          <span>{{ userInfo.group?.studentCount }}</span>
-        </p>
-      </div>
-      <div class="welcome-section">
-        <h2 class="welcome-title">Welcome!</h2>
-        <p class="message">
-          Here you can view all your academic records and performance details.
-        </p>
-        <a href="#" @click.prevent="viewGrades" class="view-grades">VIEW ALL GRADES</a>
-      </div>
-    </div>
+    <!-- Информационная карточка с табами -->
+    <v-card class="info-card">
+      <v-tabs v-model="tab" background-color="primary" dark>
+        <v-tab value="profile">Profile</v-tab>
+        <v-tab value="rating">Group Rating</v-tab>
+      </v-tabs>
+      <v-divider></v-divider>
+      <v-tabs-window v-model="tab">
+        <!-- Таб Profile: информация о пользователе -->
+        <v-tabs-window-item value="profile">
+          <v-card-text>
+            <div class="info-section">
+              <h2 class="title animated-text">{{ userInfo.fullName }}</h2>
+              <p class="detail animated-text">
+                <strong>GPA:</strong> <span>{{ userInfo.gpa }}</span>
+              </p>
+              <p class="detail animated-text">
+                <strong>Specialization:</strong> <span>{{ userInfo.specializationName }}</span>
+              </p>
+              <p class="detail animated-text">
+                <strong>Course:</strong> <span>{{ userInfo.courseNumber }}</span>
+              </p>
+              <!-- Информация о группе -->
+              <p class="detail animated-text">
+                <strong>Group:</strong> <span>{{ userInfo.group?.name }}</span>
+              </p>
+              <p class="detail animated-text">
+                <strong>Students in group:</strong> <span>{{ userInfo.group?.studentCount }}</span>
+              </p>
+            </div>
+            <div class="welcome-section">
+              <h2 class="welcome-title">Welcome!</h2>
+              <p class="message">
+                Here you can view all your academic records and performance details.
+              </p>
+              <a href="#" @click.prevent="viewGrades" class="view-grades">VIEW ALL GRADES</a>
+            </div>
+          </v-card-text>
+        </v-tabs-window-item>
+
+        <!-- Таб Group Rating: отображение рейтинга группы -->
+        <v-tabs-window-item value="rating">
+          <v-card-text>
+            <div class="info-section">
+              <h2 class="title ">Group Rating</h2>
+              <p v-if="groupRating !== null" class="detail ">
+                <strong>Rating:</strong> <span>№{{ groupRating }}</span>
+              </p>
+              <p v-else class="detail">
+                No rating data available.
+              </p>
+              <p class="detail">
+                <strong>Your GPA:</strong> <span>{{ userInfo.gpa }}</span>
+              </p>
+            </div>
+          </v-card-text>
+        </v-tabs-window-item>
+      </v-tabs-window>
+    </v-card>
   </v-container>
 </template>
 
@@ -50,29 +75,30 @@ import { useRouter } from 'vue-router';
 import jwt_decode from 'jwt-decode';
 
 const router = useRouter();
+const tab = ref("profile");
+
 const userInfo = ref({
   fullName: '',
   gpa: '',
   specializationName: '',
   courseNumber: '',
   group: {
+    id: null, // groupId для рейтинга
     name: '',
     studentCount: ''
   }
 });
+const groupRating = ref(null);
 
-// Переход на страницу с оценками
 const viewGrades = () => {
   console.log("Переход на страницу с оценками...");
   router.push({ name: "GradesPage" });
 };
 
-// Генерация случайного положения и анимации звезд
 const getStarStyle = () => {
   const randomPosition = () => Math.random() * 100;
   const randomAnimationDelay = () => Math.random() * 5;
   const randomSize = () => Math.random() * 3 + 1;
-
   return {
     top: `${randomPosition()}%`,
     left: `${randomPosition()}%`,
@@ -82,7 +108,6 @@ const getStarStyle = () => {
   };
 };
 
-// Проверка истечения токена
 const isTokenExpired = (token) => {
   try {
     const decoded = jwt_decode(token);
@@ -94,7 +119,6 @@ const isTokenExpired = (token) => {
   }
 };
 
-// Функция получения информации о пользователе
 const fetchUserInfo = async () => {
   console.log("Получение информации о пользователе...");
   try {
@@ -104,7 +128,6 @@ const fetchUserInfo = async () => {
       router.push({ name: "AuthForm" });
       return;
     }
-
     const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/auth-api/user/getUser`, {
       method: "GET",
       headers: {
@@ -112,16 +135,13 @@ const fetchUserInfo = async () => {
         "Content-Type": "application/json",
       },
     });
-
-    if (!response.ok) {
-      throw new Error(`Ошибка сервера: ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
     const data = await response.json();
-    console.log("Ответ от сервера получен:", data);
+    console.log("Информация о пользователе получена:", data);
     userInfo.value = data;
-
-    // Запуск анимации текста
+    if (userInfo.value.group && userInfo.value.group.id) {
+      fetchGroupRating(userInfo.value.group.id);
+    }
     const elements = document.querySelectorAll('.animated-text');
     elements.forEach((el, index) => {
       setTimeout(() => {
@@ -131,6 +151,26 @@ const fetchUserInfo = async () => {
   } catch (error) {
     console.error("Ошибка при получении данных пользователя:", error.message);
     router.push({ name: "AuthForm" });
+  }
+};
+
+const fetchGroupRating = async (groupId) => {
+  console.log("Получение рейтинга группы для groupId:", groupId);
+  try {
+    const token = Cookies.get('auth_token');
+    const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/auth-api/group/getStudentRating/${groupId}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
+    const data = await response.json();
+    console.log("Данные рейтинга группы:", data);
+    groupRating.value = data; // Ожидается, что API возвращает число, например 1
+  } catch (error) {
+    console.error("Ошибка при получении рейтинга группы:", error.message);
   }
 };
 
@@ -212,9 +252,6 @@ onMounted(() => {
 /* Info Card */
 .info-card {
   position: relative;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   width: 90%;
   max-width: 850px;
   background: #ffffff;
