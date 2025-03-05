@@ -9,14 +9,34 @@
     <!-- User Information Card -->
     <div class="info-card">
       <div class="info-section">
-        <h2 class="title animated-text">{{ userInfo.fullname || "Loading..." }}</h2>
-        <p class="detail animated-text"><strong>GPA:</strong> <span>{{ userInfo.gpa || "Loading..." }}</span></p>
-        <p class="detail animated-text"><strong>Specialization:</strong> <span>{{ userInfo.specialization || "Loading..." }}</span></p>
-        <p class="detail animated-text"><strong>Course:</strong> <span>{{ userInfo.course || "Loading..." }}</span></p>
+        <h2 class="title animated-text">{{ userInfo.fullName }}</h2>
+        <p class="detail animated-text">
+          <strong>GPA:</strong>
+          <span>{{ userInfo.gpa }}</span>
+        </p>
+        <p class="detail animated-text">
+          <strong>Specialization:</strong>
+          <span>{{ userInfo.specializationName }}</span>
+        </p>
+        <p class="detail animated-text">
+          <strong>Course:</strong>
+          <span>{{ userInfo.courseNumber }}</span>
+        </p>
+        <!-- Информация о группе -->
+        <p class="detail animated-text">
+          <strong>Group:</strong>
+          <span>{{ userInfo.group?.name }}</span>
+        </p>
+        <p class="detail animated-text">
+          <strong>Students in group:</strong>
+          <span>{{ userInfo.group?.studentCount }}</span>
+        </p>
       </div>
       <div class="welcome-section">
         <h2 class="welcome-title">Welcome!</h2>
-        <p class="message">Here you can view all your academic records and performance details.</p>
+        <p class="message">
+          Here you can view all your academic records and performance details.
+        </p>
         <a href="#" @click.prevent="viewGrades" class="view-grades">VIEW ALL GRADES</a>
       </div>
     </div>
@@ -25,16 +45,20 @@
 
 <script setup lang="js">
 import { ref, onMounted } from 'vue';
-import Cookies from 'js-cookie'; // Импортируем библиотеку для работы с   ми
+import Cookies from 'js-cookie';
 import { useRouter } from 'vue-router';
 import jwt_decode from 'jwt-decode';
 
 const router = useRouter();
 const userInfo = ref({
-  fullname: '',
+  fullName: '',
   gpa: '',
-  specialization: '',
-  course: ''
+  specializationName: '',
+  courseNumber: '',
+  group: {
+    name: '',
+    studentCount: ''
+  }
 });
 
 // Переход на страницу с оценками
@@ -61,9 +85,9 @@ const getStarStyle = () => {
 // Проверка истечения токена
 const isTokenExpired = (token) => {
   try {
-    const decoded = jwt_decode(token); // Декодируем токен
-    const currentTime = Math.floor(Date.now() / 1000); // Текущее время в секундах
-    return decoded.exp < currentTime; // Проверяем, истек ли токен
+    const decoded = jwt_decode(token);
+    const currentTime = Math.floor(Date.now() / 1000);
+    return decoded.exp < currentTime;
   } catch (error) {
     console.error("Ошибка при проверке истечения токена:", error.message);
     return true;
@@ -74,8 +98,7 @@ const isTokenExpired = (token) => {
 const fetchUserInfo = async () => {
   console.log("Получение информации о пользователе...");
   try {
-    const token = Cookies.get('auth_token'); // Получаем токен из Cookies
-
+    const token = Cookies.get('auth_token');
     if (!token || isTokenExpired(token)) {
       console.error("Токен отсутствует или истёк. Перенаправление на страницу входа.");
       router.push({ name: "AuthForm" });
@@ -111,7 +134,6 @@ const fetchUserInfo = async () => {
   }
 };
 
-// Получение данных при загрузке страницы
 onMounted(() => {
   fetchUserInfo();
 });
