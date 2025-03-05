@@ -4,11 +4,15 @@
       <!-- Навбар -->
       <v-app-bar color="red" prominent>
         <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-
         <v-toolbar-title>Grades</v-toolbar-title>
-
         <v-spacer></v-spacer>
-
+        <!-- Кнопки выбора года и семестра -->
+        <v-btn text color="white" @click="selectYear">
+          Year: {{ selectedYear }}
+        </v-btn>
+        <v-btn text color="white" @click="selectSemester">
+          Semester: {{ selectedSemester }}
+        </v-btn>
         <v-btn text color="white" @click="redirectToHome">
           Home
         </v-btn>
@@ -61,7 +65,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import Cookies from 'js-cookie'; // Импортируем библиотеку для работы с куками
+import Cookies from 'js-cookie';
 import { useRouter } from 'vue-router';
 import jwt_decode from 'jwt-decode';
 import axios from 'axios';
@@ -70,35 +74,75 @@ const router = useRouter();
 const drawer = ref(false);
 const courses = ref([]);
 
+// Выбранные год и семестр (дефолтно можно задать текущие значения)
+const selectedYear = ref(2024);
+const selectedSemester = ref(1);
+
+// Функция для выбора года (например, через prompt)
+const selectYear = () => {
+  const newYear = prompt("Enter year:", selectedYear.value);
+  if(newYear) {
+    selectedYear.value = parseInt(newYear);
+    fetchGrades();
+  }
+};
+
+// Функция для выбора семестра (1 или 2)
+const selectSemester = () => {
+  const newSem = prompt("Enter semester (1 or 2):", selectedSemester.value);
+  if(newSem && (newSem === "1" || newSem === "2")) {
+    selectedSemester.value = parseInt(newSem);
+    fetchGrades();
+  }
+};
+
+// Функция для получения предыдущего семестра
+const getPreviousSemester = (year, semester) => {
+  if(semester === 1) {
+    return { year: year - 1, semester: 2 };
+  } else {
+    return { year: year, semester: 1 };
+  }
+};
+
 // Проверка истечения токена
 const isTokenExpired = (token) => {
   try {
-    const decoded = jwt_decode(token); // Декодируем токен
-    const currentTime = Math.floor(Date.now() / 1000); // Текущее время в секундах
-    return decoded.exp < currentTime; // Проверяем, истек ли токен
+    const decoded = jwt_decode(token);
+    const currentTime = Math.floor(Date.now() / 1000);
+    return decoded.exp < currentTime;
   } catch (error) {
     console.error("Ошибка при проверке истечения токена:", error.message);
     return true;
   }
 };
 
-// Получение данных курсов с сервера
+// Получение данных курсов с сервера с логикой выбора семестра
 const fetchGrades = async () => {
-  console.log("Получение списка курсов...");
+  console.log("Получение списка курсов для Year:", selectedYear.value, "Semester:", selectedSemester.value);
   try {
-    const token = Cookies.get('auth_token'); // Получаем токен из Cookies
-
+    const token = Cookies.get('auth_token');
     if (!token || isTokenExpired(token)) {
       console.error("Токен отсутствует или истёк. Перенаправление на страницу входа.");
       router.push({ name: "LoginPage" });
       return;
     }
 
-    const response = await axios.get(`${process.env.VUE_APP_BASE_URL}/api/auth-api/grades/getGrades?year=2024&semester=1`, {
+    const url = `${process.env.VUE_APP_BASE_URL}/api/auth-api/grades/getGrades?year=${selectedYear.value}&semester=${selectedSemester.value}`;
+    const response = await axios.get(url, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
+
+    if (response.data.length === 0) {
+      console.warn("Оценок не найдено для текущего семестра, переключаемся на предыдущий семестр.");
+      const prev = getPreviousSemester(selectedYear.value, selectedSemester.value);
+      selectedYear.value = prev.year;
+      selectedSemester.value = prev.semester;
+      // Рекурсивно вызываем fetchGrades для предыдущего семестра
+      return fetchGrades();
+    }
 
     courses.value = response.data.map((item) => ({
       subjectName: item.subjectName,
@@ -118,7 +162,7 @@ const redirectToHome = () => {
   router.push({ name: "UserPage" });
 };
 
-// Функция для прогресса (0-100%)
+// Функция для расчёта прогресса (0-100%)
 const getProgress = (mark) => {
   if (mark === '-' || mark === null || mark === 'Не задано') return 0;
   const markValue = parseFloat(mark);
@@ -134,10 +178,8 @@ const getProgressColor = (mark) => {
   return 'green';
 };
 
-// Загрузка данных при монтировании компонента
 onMounted(fetchGrades);
 </script>
-
 
 <style scoped>
 .v-card {
