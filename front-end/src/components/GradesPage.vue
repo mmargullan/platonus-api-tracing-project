@@ -1,66 +1,88 @@
 <template>
-  <v-card>
-    <v-layout>
-      <!-- Навбар -->
-      <v-app-bar color="red" prominent>
-        <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-        <v-toolbar-title>Grades</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <!-- Кнопки выбора года и семестра -->
-        <v-btn text color="white" @click="selectYear">
-          Year: {{ selectedYear }}
-        </v-btn>
-        <v-btn text color="white" @click="selectSemester">
-          Semester: {{ selectedSemester }}
-        </v-btn>
-        <v-btn text color="white" @click="redirectToHome">
-          Home
-        </v-btn>
-      </v-app-bar>
+  <div>
+    <!-- Подключаем навбар -->
+    <NavBar />
 
-      <!-- Основной контент -->
-      <v-main>
-        <v-container>
-          <!-- Список курсов -->
-          <v-row>
-            <v-col v-for="(course, index) in courses" :key="index" cols="12" md="6">
-              <v-card class="mb-4">
-                <v-card-title>{{ course.subjectName }}</v-card-title>
-                <v-card-subtitle>Преподаватели: {{ course.tutorList }}</v-card-subtitle>
-                <v-card-text>
-                  <v-list>
-                    <v-list-item-group>
-                      <v-list-item v-for="(exam, idx) in course.exams" :key="idx">
-                        <v-list-item-content>
-                          <v-row class="d-flex align-center mt-2">
-                            <v-col cols="3">
-                              <v-list-item-title>{{ exam.name }}</v-list-item-title>
-                            </v-col>
-                            <v-col cols="7" class="pl-0">
-                              <v-progress-linear
-                                :model-value="getProgress(exam.mark)"
-                                :color="getProgressColor(exam.mark)"
-                                bg-color="#f0f0f0"
-                                height="12"
-                                rounded
-                              ></v-progress-linear>
-                            </v-col>
-                            <v-col cols="2" class="d-flex justify-end">
-                              <div class="text-h6">{{ getProgress(exam.mark) }}%</div>
-                            </v-col>
-                          </v-row>
-                        </v-list-item-content>
-                      </v-list-item>
-                    </v-list-item-group>
-                  </v-list>
-                </v-card-text>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-main>
-    </v-layout>
-  </v-card>
+    <v-card>
+      <v-layout>
+        <!-- Верхний бар с выбором года, семестра и кнопкой Home -->
+        <v-app-bar color="red" prominent>
+          <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+          <v-toolbar-title>Grades</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <!-- Кнопки выбора года и семестра -->
+          <v-btn text color="white" @click="selectYear">
+            Year: {{ selectedYear }}
+          </v-btn>
+          <v-btn text color="white" @click="selectSemester">
+            Semester: {{ selectedSemester }}
+          </v-btn>
+          <v-btn text color="white" @click="redirectToHome">
+            Home
+          </v-btn>
+        </v-app-bar>
+
+        <!-- Основной контент -->
+        <v-main>
+          <v-container>
+            <!-- Список курсов -->
+            <v-row>
+              <v-col
+                v-for="(course, index) in courses"
+                :key="index"
+                cols="12"
+                md="6"
+              >
+                <v-card class="mb-4">
+                  <v-card-title>{{ course.subjectName }}</v-card-title>
+                  <v-card-subtitle>
+                    Преподаватели: {{ course.tutorList }}
+                  </v-card-subtitle>
+                  <v-card-text>
+                    <v-list>
+                      <v-list-item-group>
+                        <v-list-item
+                          v-for="(exam, idx) in course.exams"
+                          :key="idx"
+                        >
+                          <v-list-item-content>
+                            <v-row class="d-flex align-center mt-2">
+                              <v-col cols="3">
+                                <v-list-item-title>
+                                  {{ exam.name }}
+                                </v-list-item-title>
+                              </v-col>
+                              <v-col cols="7" class="pl-0">
+                                <v-progress-linear
+                                  :model-value="getProgress(exam.mark)"
+                                  :color="getProgressColor(exam.mark)"
+                                  bg-color="#f0f0f0"
+                                  height="12"
+                                  rounded
+                                ></v-progress-linear>
+                              </v-col>
+                              <v-col
+                                cols="2"
+                                class="d-flex justify-end"
+                              >
+                                <div class="text-h6">
+                                  {{ getProgress(exam.mark) }}%
+                                </div>
+                              </v-col>
+                            </v-row>
+                          </v-list-item-content>
+                        </v-list-item>
+                      </v-list-item-group>
+                    </v-list>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-main>
+      </v-layout>
+    </v-card>
+  </div>
 </template>
 
 <script setup>
@@ -69,6 +91,7 @@ import Cookies from 'js-cookie';
 import { useRouter } from 'vue-router';
 import jwt_decode from 'jwt-decode';
 import axios from 'axios';
+import NavBar from '@/components/NavBar.vue';
 
 const router = useRouter();
 const drawer = ref(false);
@@ -182,6 +205,12 @@ onMounted(fetchGrades);
 </script>
 
 <style scoped>
+
+.main-container {
+  margin-left: 256px;
+}
+
+
 .v-card {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

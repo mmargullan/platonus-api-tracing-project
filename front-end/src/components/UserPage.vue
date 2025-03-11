@@ -1,71 +1,77 @@
 <template>
-  <v-container fluid class="main-container">
-    <!-- Background Material Geometry -->
-    <div class="background-shapes"></div>
-    <div class="glitter-container">
-      <div v-for="n in 100" :key="n" class="star" :style="getStarStyle()"></div>
-    </div>
+  <div>
+    <!-- Подключаем навбар -->
+    <NavBar />
 
-    <!-- Информационная карточка с табами -->
-    <v-card class="info-card">
-      <v-tabs v-model="tab" background-color="primary" dark>
-        <v-tab value="profile">Profile</v-tab>
-        <v-tab value="rating">Group Rating</v-tab>
-      </v-tabs>
-      <v-divider></v-divider>
-      <v-tabs-window v-model="tab">
-        <!-- Таб Profile: информация о пользователе -->
-        <v-tabs-window-item value="profile">
-          <v-card-text>
-            <div class="info-section">
-              <h2 class="title animated-text">{{ userInfo.fullName }}</h2>
-              <p class="detail animated-text">
-                <strong>GPA:</strong> <span>{{ userInfo.gpa }}</span>
-              </p>
-              <p class="detail animated-text">
-                <strong>Specialization:</strong> <span>{{ userInfo.specializationName }}</span>
-              </p>
-              <p class="detail animated-text">
-                <strong>Course:</strong> <span>{{ userInfo.courseNumber }}</span>
-              </p>
-              <!-- Информация о группе -->
-              <p class="detail animated-text">
-                <strong>Group:</strong> <span>{{ userInfo.group?.name }}</span>
-              </p>
-              <p class="detail animated-text">
-                <strong>Students in group:</strong> <span>{{ userInfo.group?.studentCount }}</span>
-              </p>
-            </div>
-            <div class="welcome-section">
-              <h2 class="welcome-title">Welcome!</h2>
-              <p class="message">
-                Here you can view all your academic records and performance details.
-              </p>
-              <a href="#" @click.prevent="viewGrades" class="view-grades">VIEW ALL GRADES</a>
-            </div>
-          </v-card-text>
-        </v-tabs-window-item>
+    <!-- Основной контейнер страницы -->
+    <v-container fluid class="main-container">
+      <!-- Background Material Geometry -->
+      <div class="background-shapes"></div>
+      <div class="glitter-container">
+        <div v-for="n in 100" :key="n" class="star" :style="getStarStyle()"></div>
+      </div>
 
-        <!-- Таб Group Rating: отображение рейтинга группы -->
-        <v-tabs-window-item value="rating">
-          <v-card-text>
-            <div class="info-section">
-              <h2 class="title ">Group Rating</h2>
-              <p v-if="groupRating !== null" class="detail ">
-                <strong>Rating:</strong> <span>№{{ groupRating }}</span>
-              </p>
-              <p v-else class="detail">
-                No rating data available.
-              </p>
-              <p class="detail">
-                <strong>Your GPA:</strong> <span>{{ userInfo.gpa }}</span>
-              </p>
-            </div>
-          </v-card-text>
-        </v-tabs-window-item>
-      </v-tabs-window>
-    </v-card>
-  </v-container>
+      <!-- Информационная карточка с табами -->
+      <v-card class="info-card">
+        <v-tabs v-model="tab" background-color="primary" dark>
+          <v-tab value="profile">Profile</v-tab>
+          <v-tab value="rating">Group Rating</v-tab>
+        </v-tabs>
+        <v-divider></v-divider>
+        <v-tabs-window v-model="tab">
+          <!-- Таб Profile: информация о пользователе -->
+          <v-tabs-window-item value="profile">
+            <v-card-text>
+              <div class="info-section">
+                <h2 class="title animated-text">{{ userInfo.fullName }}</h2>
+                <p class="detail animated-text">
+                  <strong>GPA:</strong> <span>{{ userInfo.gpa }}</span>
+                </p>
+                <p class="detail animated-text">
+                  <strong>Specialization:</strong> <span>{{ userInfo.specializationName }}</span>
+                </p>
+                <p class="detail animated-text">
+                  <strong>Course:</strong> <span>{{ userInfo.courseNumber }}</span>
+                </p>
+                <!-- Информация о группе -->
+                <p class="detail animated-text">
+                  <strong>Group:</strong> <span>{{ userInfo.group?.name }}</span>
+                </p>
+                <p class="detail animated-text">
+                  <strong>Students in group:</strong> <span>{{ userInfo.group?.studentCount }}</span>
+                </p>
+              </div>
+              <div class="welcome-section">
+                <h2 class="welcome-title">Welcome!</h2>
+                <p class="message">
+                  Here you can view all your academic records and performance details.
+                </p>
+                <a href="#" @click.prevent="viewGrades" class="view-grades">VIEW ALL GRADES</a>
+              </div>
+            </v-card-text>
+          </v-tabs-window-item>
+
+          <!-- Таб Group Rating: отображение рейтинга группы -->
+          <v-tabs-window-item value="rating">
+            <v-card-text>
+              <div class="info-section">
+                <h2 class="title">Group Rating</h2>
+                <p v-if="groupRating !== null" class="detail">
+                  <strong>Rating:</strong> <span>№{{ groupRating }}</span>
+                </p>
+                <p v-else class="detail">
+                  No rating data available.
+                </p>
+                <p class="detail">
+                  <strong>Your GPA:</strong> <span>{{ userInfo.gpa }}</span>
+                </p>
+              </div>
+            </v-card-text>
+          </v-tabs-window-item>
+        </v-tabs-window>
+      </v-card>
+    </v-container>
+  </div>
 </template>
 
 <script setup lang="js">
@@ -73,6 +79,7 @@ import { ref, onMounted } from 'vue';
 import Cookies from 'js-cookie';
 import { useRouter } from 'vue-router';
 import jwt_decode from 'jwt-decode';
+import NavBar from '@/components/NavBar.vue'; // Импорт компонента NavBar
 
 const router = useRouter();
 const tab = ref("profile");
@@ -83,7 +90,7 @@ const userInfo = ref({
   specializationName: '',
   courseNumber: '',
   group: {
-    id: null, // groupId для рейтинга
+    id: null,
     name: '',
     studentCount: ''
   }
@@ -168,7 +175,7 @@ const fetchGroupRating = async (groupId) => {
     if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
     const data = await response.json();
     console.log("Данные рейтинга группы:", data);
-    groupRating.value = data; // Ожидается, что API возвращает число, например 1
+    groupRating.value = data;
   } catch (error) {
     console.error("Ошибка при получении рейтинга группы:", error.message);
   }
