@@ -139,6 +139,9 @@ const fetchUserInfo = async () => {
     const data = await response.json();
     console.log("Информация о пользователе получена:", data);
     userInfo.value = data;
+
+    localStorage.setItem('userFullName', data.fullName);
+
     if (userInfo.value.group && userInfo.value.group.id) {
       fetchGroupRating(userInfo.value.group.id);
     }
