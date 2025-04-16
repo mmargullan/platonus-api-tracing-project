@@ -1,6 +1,9 @@
 package endterm.dto
 
-data class ChatMessage(
-    val from: String,
-    val text: String
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
+
+data class ChatMessage @JsonCreator constructor(
+    @JsonProperty("from") val from: String,
+    @JsonProperty("text") val text: String
 )

@@ -12,7 +12,7 @@ class CorsGlobalConfig {
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf("http://localhost:8080")  // Или укажи конкретный домен, например "http://localhost:5173"
+        configuration.allowedOrigins = listOf("*")
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
         configuration.allowedHeaders = listOf("*")
         configuration.allowCredentials = true
