@@ -13,7 +13,7 @@ const updateUserName = (name) => {
 }
 
 const connectWebSocket = () => {
-  const socket = new SockJS("http://localhost:6969/chat");
+  const socket = new SockJS(`${process.env.VUE_APP_BASE_URL}/chat`);
 
   stompClient.value = new Client({
     webSocketFactory: () => socket,
