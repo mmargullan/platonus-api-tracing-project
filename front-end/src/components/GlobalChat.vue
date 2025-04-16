@@ -2,6 +2,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import SockJS from 'sockjs-client'
 import { Client } from '@stomp/stompjs'
+import axios from 'axios'
 
 const stompClient = ref(null)
 const messages = ref([])
@@ -13,7 +14,7 @@ const updateUserName = (name) => {
 }
 
 const connectWebSocket = () => {
-  const socket = new SockJS(`${process.env.VUE_APP_BASE_URL}/chat-api`);
+  const socket = new SockJS(`${process.env.VUE_APP_BASE_URL}/chat-api/chat`);
 
   stompClient.value = new Client({
     webSocketFactory: () => socket,
@@ -56,10 +57,30 @@ const handleKeyDown = (event) => {
   if (event.key === "Enter") sendMessage()
 }
 
-onMounted(() => {
+onMounted(async () => {
   updateUserName(userName.value)
+
+  try {
+    const response = await axios.get(`${process.env.VUE_APP_BASE_URL}/chat-api/message/getAll`)
+    console.log("📥 История сообщений:", response.data)
+
+    const history = response.data
+
+    if (Array.isArray(history)) {
+      messages.value = history.map(msg => {
+        if (msg && typeof msg === 'object' && 'from' in msg && 'text' in msg) {
+          return `${msg.from}: ${msg.text}`
+        }
+        return '[неизвестное сообщение]'
+      })
+    }
+  } catch (err) {
+    console.error("❌ Ошибка при загрузке истории сообщений:", err)
+  }
+
   connectWebSocket()
 })
+
 
 onBeforeUnmount(() => {
   if (stompClient.value && stompClient.value.connected) {

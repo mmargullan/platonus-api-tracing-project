@@ -29,6 +29,7 @@ dependencies {
 	implementation("org.springframework:spring-messaging")
 	implementation("org.webjars:stomp-websocket:2.3.3")
 	implementation("org.webjars:sockjs-client:1.5.1")
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
 }
 
 tasks.withType<KotlinCompile> {
