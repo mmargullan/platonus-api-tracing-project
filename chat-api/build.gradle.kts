@@ -24,6 +24,12 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	implementation("org.springframework.boot:spring-boot-starter-logging")
+	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation("org.springframework:spring-messaging")
+	implementation("org.webjars:stomp-websocket:2.3.3")
+	implementation("org.webjars:sockjs-client:1.5.1")
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
 }
 
 tasks.withType<KotlinCompile> {
