@@ -151,7 +151,7 @@ const fetchGrades = async () => {
       return;
     }
 
-    const url = `${process.env.VUE_APP_BASE_URL}/api/auth-api/grades/getGrades?year=${selectedYear.value}&semester=${selectedSemester.value}`;
+    const url = `${process.env.VUE_APP_BASE_URL}/auth-api/grades/getGrades?year=${selectedYear.value}&semester=${selectedSemester.value}`;
     const response = await axios.get(url, {
       headers: {
         Authorization: `Bearer ${token}`,
