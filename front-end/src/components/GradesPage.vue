@@ -3,85 +3,86 @@
     <!-- Подключаем навбар -->
     <NavBar />
 
-    <v-card>
-      <v-layout>
-        <!-- Верхний бар с выбором года, семестра и кнопкой Home -->
-        <v-app-bar color="red" prominent>
-          <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-          <v-toolbar-title>Grades</v-toolbar-title>
-          <v-spacer></v-spacer>
-          <!-- Кнопки выбора года и семестра -->
-          <v-btn text color="white" @click="selectYear">
-            Year: {{ selectedYear }}
-          </v-btn>
-          <v-btn text color="white" @click="selectSemester">
-            Semester: {{ selectedSemester }}
-          </v-btn>
-          <v-btn text color="white" @click="redirectToHome">
-            Home
-          </v-btn>
-        </v-app-bar>
+    <div class="grades-content">
+      <v-card class="grades-card">
+        <v-layout>
+          <!-- Верхний бар с выбором года, семестра и кнопкой Home -->
+          <v-app-bar prominent class="custom-app-bar">
 
-        <!-- Основной контент -->
-        <v-main>
-          <v-container>
-            <!-- Список курсов -->
-            <v-row>
-              <v-col
-                v-for="(course, index) in courses"
-                :key="index"
-                cols="12"
-                md="6"
-              >
-                <v-card class="mb-4">
-                  <v-card-title>{{ course.subjectName }}</v-card-title>
-                  <v-card-subtitle>
-                    Преподаватели: {{ course.tutorList }}
-                  </v-card-subtitle>
-                  <v-card-text>
-                    <v-list>
-                      <v-list-item-group>
-                        <v-list-item
-                          v-for="(exam, idx) in course.exams"
-                          :key="idx"
-                        >
-                          <v-list-item-content>
-                            <v-row class="d-flex align-center mt-2">
-                              <v-col cols="3">
-                                <v-list-item-title>
-                                  {{ exam.name }}
-                                </v-list-item-title>
-                              </v-col>
-                              <v-col cols="7" class="pl-0">
-                                <v-progress-linear
-                                  :model-value="getProgress(exam.mark)"
-                                  :color="getProgressColor(exam.mark)"
-                                  bg-color="#f0f0f0"
-                                  height="12"
-                                  rounded
-                                ></v-progress-linear>
-                              </v-col>
-                              <v-col
-                                cols="2"
-                                class="d-flex justify-end"
-                              >
-                                <div class="text-h6">
-                                  {{ getProgress(exam.mark) }}%
-                                </div>
-                              </v-col>
-                            </v-row>
-                          </v-list-item-content>
-                        </v-list-item>
-                      </v-list-item-group>
-                    </v-list>
-                  </v-card-text>
-                </v-card>
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-main>
-      </v-layout>
-    </v-card>
+            <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+            <v-toolbar-title>Grades</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <!-- Кнопки выбора года и семестра -->
+            <v-btn text color="white" @click="selectYear">
+              Year: {{ selectedYear }}
+            </v-btn>
+            <v-btn text color="white" @click="selectSemester">
+              Semester: {{ selectedSemester }}
+            </v-btn>
+            
+          </v-app-bar>
+
+          <!-- Основной контент -->
+          <v-main>
+            <v-container>
+              <!-- Список курсов -->
+              <v-row>
+                <v-col
+                  v-for="(course, index) in courses"
+                  :key="index"
+                  cols="12"
+                  md="6"
+                >
+                  <v-card class="mb-4">
+                    <v-card-title>{{ course.subjectName }}</v-card-title>
+                    <v-card-subtitle>
+                      Преподаватели: {{ course.tutorList }}
+                    </v-card-subtitle>
+                    <v-card-text>
+                      <v-list>
+                        <v-list-item-group>
+                          <v-list-item
+                            v-for="(exam, idx) in course.exams"
+                            :key="idx"
+                          >
+                            <v-list-item-content>
+                              <v-row class="d-flex align-center mt-2">
+                                <v-col cols="3">
+                                  <v-list-item-title>
+                                    {{ exam.name }}
+                                  </v-list-item-title>
+                                </v-col>
+                                <v-col cols="7" class="pl-0">
+                                  <v-progress-linear
+                                    :model-value="getProgress(exam.mark)"
+                                    :color="getProgressColor(exam.mark)"
+                                    bg-color="#f0f0f0"
+                                    height="12"
+                                    rounded
+                                  ></v-progress-linear>
+                                </v-col>
+                                <v-col
+                                  cols="2"
+                                  class="d-flex justify-end"
+                                >
+                                  <div class="text-h6">
+                                    {{ getProgress(exam.mark) }}%
+                                  </div>
+                                </v-col>
+                              </v-row>
+                            </v-list-item-content>
+                          </v-list-item>
+                        </v-list-item-group>
+                      </v-list>
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-main>
+        </v-layout>
+      </v-card>
+    </div>
   </div>
 </template>
 
@@ -180,11 +181,6 @@ const fetchGrades = async () => {
   }
 };
 
-// Функция для редиректа на главную страницу
-const redirectToHome = () => {
-  router.push({ name: "UserPage" });
-};
-
 // Функция для расчёта прогресса (0-100%)
 const getProgress = (mark) => {
   if (mark === '-' || mark === null || mark === 'Не задано') return 0;
@@ -198,18 +194,25 @@ const getProgressColor = (mark) => {
   if (progress <= 25) return 'red';
   if (progress <= 50) return 'yellow';
   if (progress <= 75) return 'blue';
-  return 'green';
+  return 'deep-purple'; // Изменил на фиолетовый для хорошей оценки
 };
 
 onMounted(fetchGrades);
 </script>
 
 <style scoped>
-
-.main-container {
-  margin-left: 256px;
+/* Стили для размещения контента справа от навбара */
+.grades-content {
+  margin-left: 200px; /* Ширина навбара */
+  background-color: #f7f2ff; /* Светло-фиолетовый фон */
+  min-height: 100vh;
+  padding: 16px;
 }
 
+.grades-card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
 
 .v-card {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -217,16 +220,22 @@ onMounted(fetchGrades);
 
 .v-card-title {
   font-weight: bold;
+  color: #47054b; /* Темно-фиолетовый цвет для заголовков */
 }
 
 .v-card-subtitle {
   font-size: 0.9rem;
-  color: gray;
+  color: #47054b; /* Фиолетовый цвет для подзаголовков */
 }
 
 .v-toolbar-title {
   font-size: 1.5rem;
   font-weight: bold;
+}
+
+.custom-app-bar {
+  background: linear-gradient(135deg, #665679, #47054b) !important;
+  color: white;
 }
 
 .v-progress-linear {
@@ -237,3 +246,5 @@ onMounted(fetchGrades);
   padding-left: 0 !important;
 }
 </style>
+
+

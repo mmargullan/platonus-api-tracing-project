@@ -1,88 +1,182 @@
 <template>
   <div>
-    <!-- Подключаем навбар -->
     <NavBar />
 
-    <!-- Основной контейнер страницы -->
-    <v-container fluid class="main-container">
-      <!-- Background Material Geometry -->
-      <div class="background-shapes"></div>
-      <div class="glitter-container">
-        <div v-for="n in 100" :key="n" class="star" :style="getStarStyle()"></div>
+  
+    <div class="stars-background">
+      <div
+        v-for="(star, i) in stars"
+        :key="i"
+        class="star"
+        :style="star.style"
+      ></div>
+    </div>
+
+    <div class="dashboard-container">
+      
+      <div class="block block-1">
+        <h2 class="greeting">Hello, {{ firstName }}!</h2>
+        <div class="profile-info">
+          <div class="info-item">
+            <v-icon color="purple" class="info-icon">mdi-account</v-icon>
+            <span class="info-label">Full Name:</span>
+            <span class="info-value">{{ userInfo.fullName }}</span>
+          </div>
+          <div class="info-item">
+            <v-icon color="purple" class="info-icon">mdi-school</v-icon>
+            <span class="info-label">GPA:</span>
+            <span class="info-value">{{ userInfo.gpa }}</span>
+          </div>
+          <div class="info-item">
+            <v-icon color="purple" class="info-icon">mdi-book-open-variant</v-icon>
+            <span class="info-label">Specialization:</span>
+            <span class="info-value">{{ userInfo.specializationName }}</span>
+          </div>
+          <div class="info-item">
+            <v-icon color="purple" class="info-icon">mdi-notebook</v-icon>
+            <span class="info-label">Course:</span>
+            <span class="info-value">{{ userInfo.courseNumber }}</span>
+          </div>
+          <div class="info-item">
+            <v-icon color="purple" class="info-icon">mdi-account-group</v-icon>
+            <span class="info-label">Group:</span>
+            <span class="info-value">{{ userInfo.group?.name }}</span>
+          </div>
+          <div class="info-item">
+            <v-icon color="purple" class="info-icon">mdi-account-multiple</v-icon>
+            <span class="info-label">Students in group:</span>
+            <span class="info-value">{{ userInfo.group?.studentCount || 'N/A' }}</span>
+          </div>
+        </div>
+        
       </div>
-
-      <!-- Информационная карточка с табами -->
-      <v-card class="info-card">
-        <v-tabs v-model="tab" background-color="primary" dark>
-          <v-tab value="profile">Profile</v-tab>
-          <v-tab value="rating">Group Rating</v-tab>
-        </v-tabs>
-        <v-divider></v-divider>
-        <v-tabs-window v-model="tab">
-          <!-- Таб Profile: информация о пользователе -->
-          <v-tabs-window-item value="profile">
-            <v-card-text>
-              <div class="info-section">
-                <h2 class="title animated-text">{{ userInfo.fullName }}</h2>
-                <p class="detail animated-text">
-                  <strong>GPA:</strong> <span>{{ userInfo.gpa }}</span>
-                </p>
-                <p class="detail animated-text">
-                  <strong>Specialization:</strong> <span>{{ userInfo.specializationName }}</span>
-                </p>
-                <p class="detail animated-text">
-                  <strong>Course:</strong> <span>{{ userInfo.courseNumber }}</span>
-                </p>
-                <!-- Информация о группе -->
-                <p class="detail animated-text">
-                  <strong>Group:</strong> <span>{{ userInfo.group?.name }}</span>
-                </p>
-                <p class="detail animated-text">
-                  <strong>Students in group:</strong> <span>{{ userInfo.group?.studentCount }}</span>
-                </p>
-              </div>
-              <div class="welcome-section">
-                <h2 class="welcome-title">Welcome!</h2>
-                <p class="message">
-                  Here you can view all your academic records and performance details.
-                </p>
-                <a href="#" @click.prevent="viewGrades" class="view-grades">VIEW ALL GRADES</a>
-              </div>
-            </v-card-text>
-          </v-tabs-window-item>
-
-          <!-- Таб Group Rating: отображение рейтинга группы -->
-          <v-tabs-window-item value="rating">
-            <v-card-text>
-              <div class="info-section">
-                <h2 class="title">Group Rating</h2>
-                <p v-if="groupRating !== null" class="detail">
-                  <strong>Rating:</strong> <span>№{{ groupRating }}</span>
-                </p>
-                <p v-else class="detail">
-                  No rating data available.
-                </p>
-                <p class="detail">
-                  <strong>Your GPA:</strong> <span>{{ userInfo.gpa }}</span>
-                </p>
-              </div>
-            </v-card-text>
-          </v-tabs-window-item>
-        </v-tabs-window>
-      </v-card>
-    </v-container>
+      
+      
+      <div class="block block-2">
+        <h3 class="block-title">Group Rating</h3>
+        <div class="rating-container">
+          <div class="rating-circle">
+            <template v-if="groupRating !== null">
+              <span class="rating-number">#{{ groupRating }}</span>
+              <span class="rating-label">your place</span>
+            </template>
+            <template v-else>
+              <span class="rating-label">No data</span>
+            </template>
+          </div>
+          <div class="gpa-display">
+            <div class="gpa-label">Your GPA</div>
+            <div class="gpa-value">{{ userInfo.gpa || 'N/A' }}</div>
+          </div>
+        </div>
+      </div>
+      
+  
+      <div class="block block-3">
+        <h3 class="block-title">Subjects & Teachers</h3>
+        <v-list class="subject-list">
+          <v-list-item v-for="(subject, index) in subjects" :key="index" class="subject-item">
+            <v-list-item-avatar>
+              <v-avatar color="purple lighten-1" size="40">
+                <span class="white--text">{{ subject.name.charAt(0) }}</span>
+              </v-avatar>
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title>{{ subject.name }}</v-list-item-title>
+              <v-list-item-subtitle>{{ subject.teacher }}</v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </div>
+      
+    
+      <div class="block block-4">
+        <h3 class="block-title">Academic Calendar</h3>
+        
+       
+        <div class="hardcoded-calendar">
+          <div class="calendar-header">
+            <div class="month-display">April 2025</div>
+          </div>
+          
+          <div class="calendar-days">
+            <div class="day-header">Mon</div>
+            <div class="day-header">Tue</div>
+            <div class="day-header">Wed</div>
+            <div class="day-header">Thu</div>
+            <div class="day-header">Fri</div>
+            <div class="day-header">Sat</div>
+            <div class="day-header">Sun</div>
+          </div>
+          
+          <div class="calendar-grid">
+            <!-- Week 1 -->
+            <div class="day disabled">31</div>
+            <div class="day">1</div>
+            <div class="day">2</div>
+            <div class="day">3</div>
+            <div class="day">4</div>
+            <div class="day">5</div>
+            <div class="day">6</div>
+            
+            <!-- Week 2 -->
+            <div class="day">7</div>
+            <div class="day">8</div>
+            <div class="day">9</div>
+            <div class="day">10</div>
+            <div class="day">11</div>
+            <div class="day">12</div>
+            <div class="day">13</div>
+            
+            <!-- Week 3 -->
+            <div class="day">14</div>
+            <div class="day event">15</div>
+            <div class="day">16</div>
+            <div class="day current">17</div>
+            <div class="day">18</div>
+            <div class="day">19</div>
+            <div class="day">20</div>
+            
+            <!-- Week 4 -->
+            <div class="day">21</div>
+            <div class="day event">22</div>
+            <div class="day">23</div>
+            <div class="day">24</div>
+            <div class="day">25</div>
+            <div class="day">26</div>
+            <div class="day">27</div>
+            
+            <!-- Week 5 -->
+            <div class="day">28</div>
+            <div class="day">29</div>
+            <div class="day">30</div>
+            <div class="day disabled">1</div>
+            <div class="day disabled">2</div>
+            <div class="day disabled">3</div>
+            <div class="day disabled">4</div>
+          </div>
+        </div>
+        
+        <div class="events-list">
+          <div class="event-item" v-for="(event, index) in upcomingEvents" :key="index">
+            <div class="event-date">{{ event.date }}</div>
+            <div class="event-title">{{ event.title }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="js">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import Cookies from 'js-cookie';
 import { useRouter } from 'vue-router';
 import jwt_decode from 'jwt-decode';
-import NavBar from '@/components/NavBar.vue'; // Импорт компонента NavBar
+import NavBar from '@/components/NavBar.vue';
 
 const router = useRouter();
-const tab = ref("profile");
+const stars = ref([]);
 
 const userInfo = ref({
   fullName: '',
@@ -93,27 +187,32 @@ const userInfo = ref({
     id: null,
     name: '',
     studentCount: ''
-  }
+  },
 });
+
+const firstName = computed(() => {
+  if (userInfo.value.fullName) {
+    return userInfo.value.fullName.split(' ')[0];
+  }
+  return '';
+});
+
 const groupRating = ref(null);
 
-const viewGrades = () => {
-  console.log("Переход на страницу с оценками...");
-  router.push({ name: "GradesPage" });
-};
+// Dummy data for demonstration
+const subjects = ref([
+  { name: 'Java Springboot', teacher: 'Prof. Gayni' },
+  { name: 'Android Kotlin', teacher: 'Prof. Zamir' },
+  { name: 'Operation System', teacher: 'Dr. Bezgeyev' },
+  { name: 'Economics', teacher: 'Ms. Hoely' }
+]);
 
-const getStarStyle = () => {
-  const randomPosition = () => Math.random() * 100;
-  const randomAnimationDelay = () => Math.random() * 5;
-  const randomSize = () => Math.random() * 3 + 1;
-  return {
-    top: `${randomPosition()}%`,
-    left: `${randomPosition()}%`,
-    width: `${randomSize()}px`,
-    height: `${randomSize()}px`,
-    animationDelay: `${randomAnimationDelay()}s`,
-  };
-};
+const upcomingEvents = ref([
+  { title: 'Midterm Exams', date: 'April 15, 2025' },
+  { title: 'Project Submission', date: 'April 22, 2025' },
+  { title: 'Final Exams Begin', date: 'May 10, 2025' }
+]);
+
 
 const isTokenExpired = (token) => {
   try {
@@ -142,7 +241,9 @@ const fetchUserInfo = async () => {
         "Content-Type": "application/json",
       },
     });
+    
     if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
+    
     const data = await response.json();
     console.log("Информация о пользователе получена:", data);
     userInfo.value = data;
@@ -152,12 +253,6 @@ const fetchUserInfo = async () => {
     if (userInfo.value.group && userInfo.value.group.id) {
       fetchGroupRating(userInfo.value.group.id);
     }
-    const elements = document.querySelectorAll('.animated-text');
-    elements.forEach((el, index) => {
-      setTimeout(() => {
-        el.classList.add('fade-in');
-      }, index * 200);
-    });
   } catch (error) {
     console.error("Ошибка при получении данных пользователя:", error.message);
     router.push({ name: "AuthForm" });
@@ -175,7 +270,9 @@ const fetchGroupRating = async (groupId) => {
         "Content-Type": "application/json",
       },
     });
+    
     if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
+    
     const data = await response.json();
     console.log("Данные рейтинга группы:", data);
     groupRating.value = data;
@@ -184,150 +281,309 @@ const fetchGroupRating = async (groupId) => {
   }
 };
 
+const generateStars = () => {
+  for (let i = 0; i < 200; i++) {
+    stars.value.push({
+      style: {
+        top: Math.random() * 100 + '%',
+        left: Math.random() * 100 + '%',
+        width: Math.random() * 3 + 'px',
+        height: Math.random() * 3 + 'px',
+        animationDelay: Math.random() * 5 + 's',
+      },
+    });
+  }
+};
+
 onMounted(() => {
   fetchUserInfo();
+  generateStars();
 });
 </script>
 
 <style scoped>
-/* Main Container */
-.main-container {
-  position: relative;
-  height: 100vh;
-  background: linear-gradient(120deg, #5fc2d4, #1b5787);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-}
 
-/* Glitter Container */
-.glitter-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+.stars-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
   pointer-events: none;
-  overflow: hidden;
-  z-index: 1;
 }
 
 .star {
   position: absolute;
   background: white;
   border-radius: 50%;
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
-  animation: twinkle 2s infinite ease-in-out;
+  animation: twinkle 3s infinite ease-in-out;
 }
 
-/* Keyframes for twinkle effect */
 @keyframes twinkle {
   0%, 100% {
-    opacity: 0.5;
+    opacity: 0.3;
   }
   50% {
     opacity: 1;
   }
 }
 
-/* Background Shapes */
-.background-shapes::before,
-.background-shapes::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  z-index: 0;
-}
 
-.background-shapes::before {
-  width: 300px;
-  height: 300px;
-  background: rgba(33, 150, 243, 0.2);
-  top: 10%;
-  left: 10%;
-}
-
-.background-shapes::after {
-  width: 500px;
-  height: 500px;
-  background: rgba(3, 169, 244, 0.15);
-  bottom: -10%;
-  right: -5%;
-  border-radius: 20%;
-  transform: rotate(25deg);
-}
-
-/* Info Card */
-.info-card {
+.dashboard-container {
   position: relative;
-  width: 90%;
-  max-width: 850px;
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 30px;
-  z-index: 3;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 20px;
+  padding: 20px;
+  margin-left: 200px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #665679, #47054b);
 }
 
-/* Typography */
-.title {
-  font-size: 2rem;
+
+.block {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s, box-shadow 0.3s;
+  overflow: hidden;
+}
+
+.block:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+}
+
+.block-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #47054b;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+
+.greeting {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #47054b;
+  margin-bottom: 20px;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+}
+
+.info-icon {
+  margin-right: 10px;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #555;
+  width: 130px;
+}
+
+.info-value {
+  font-weight: 500;
+  color: #47054b;
+}
+
+
+.rating-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.rating-circle {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #665679, #47054b);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 6px 15px rgba(71, 5, 75, 0.3);
+}
+
+.rating-number {
+  font-size: 2.5rem;
   font-weight: bold;
-  color: #0f1317;
 }
 
-.welcome-title {
+.rating-label {
+  font-size: 0.9rem;
+}
+
+.gpa-display {
+  text-align: center;
+}
+
+.gpa-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.gpa-value {
   font-size: 1.5rem;
-  font-weight: bold;
-  color: #1c1e21;
+  font-weight: 700;
+  color: #47054b;
 }
 
-.detail {
-  font-size: 1rem;
-  color: #2c2d30;
-  margin: 8px 0;
+
+.subject-list {
+  background-color: transparent !important;
+}
+
+.subject-item {
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: background-color 0.2s;
+}
+
+.subject-item:hover {
+  background-color: #f5f0f7;
+}
+
+
+.hardcoded-calendar {
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-header {
+  background-color: #47054b;
+  color: white;
+  padding: 12px 16px;
+  text-align: center;
+}
+
+.month-display {
+  font-size: 1.2rem;
   font-weight: 600;
 }
 
-.detail strong {
-  color: #0288d1;
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  padding: 8px 0;
+  background-color: #f5f0f7;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.message {
-  color: #252529;
-  margin: 5px 0;
-  font-size: 1rem;
+.day-header {
+  font-weight: 600;
+  color: #666;
+  font-size: 0.85rem;
 }
 
-/* Text Animation */
-.animated-text {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: 2px;
+  padding: 8px;
 }
 
-.animated-text.fade-in {
-  opacity: 1;
-  transform: translateY(0);
+.day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  border-radius: 50%;
+  margin: 2px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-/* Button */
-.view-grades {
-  text-decoration: none;
-  background: #129ddb;
-  color: #f0f3f5;
-  padding: 12px 24px;
-  border-radius: 4px;
-  font-weight: bold;
-  font-size: 1rem;
-  display: inline-block;
-  margin-top: 20px;
-  transition: background 0.3s ease;
+.day:hover:not(.disabled) {
+  background-color: #f0f0f0;
 }
 
-.view-grades:hover {
-  background: #0288d1;
+.day.disabled {
+  color: #ccc;
+  cursor: default;
+}
+
+.day.current {
+  background-color: #47054b;
+  color: white;
+}
+
+.day.event {
+  background-color: #f5f0f7;
+  border: 2px solid #47054b;
+  color: #47054b;
+  font-weight: 600;
+}
+
+.events-list {
+  margin-top: 15px;
+  overflow-y: auto;
+  max-height: 150px;
+}
+
+.event-item {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background-color: #f5f0f7;
+  border-radius: 6px;
+  border-left: 3px solid #47054b;
+}
+
+.event-date {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.event-title {
+  font-weight: 600;
+  color: #47054b;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .dashboard-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, auto);
+  }
+}
+
+@media (max-width: 600px) {
+  .rating-circle {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .greeting {
+    font-size: 1.5rem;
+  }
 }
 </style>
