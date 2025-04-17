@@ -234,7 +234,7 @@ const fetchUserInfo = async () => {
       router.push({ name: "AuthForm" });
       return;
     }
-    const response = await fetch(`${process.env.VUE_APP_BASE_URL}/auth-api/user/getUser`, {
+    const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/auth-api/user/getUser`, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -263,7 +263,7 @@ const fetchGroupRating = async (groupId) => {
   console.log("Получение рейтинга группы для groupId:", groupId);
   try {
     const token = Cookies.get('auth_token');
-    const response = await fetch(`${process.env.VUE_APP_BASE_URL}/auth-api/group/getStudentRating/${groupId}`, {
+    const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/auth-api/group/getStudentRating/${groupId}`, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${token}`,
