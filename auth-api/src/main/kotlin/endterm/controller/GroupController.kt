@@ -31,7 +31,7 @@ class GroupController(
 
     @GetMapping("/getStudentRating/{groupId}")
     fun getStudentRating(@PathVariable groupId: Long): Int {
-        return groupService.getStudentRating(groupId)
+        return groupService.getStudentRating("35567@iitu.edu.kz", groupId)
     }
 
 }
