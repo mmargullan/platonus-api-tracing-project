@@ -69,7 +69,6 @@ class UserService(
                 this.address = student.adress
                 this.education = student.education
                 this.birthDate = student.birthDate
-                this.rating = groupService.getStudentRating(group.id!!)
             }
 
             if (userRepository.findByPersonId(user.personId!!) == null) {
@@ -78,6 +77,7 @@ class UserService(
                 logger.info("User ${user.login} was saved")
                 updateGroup(group)
             }
+            user.rating = groupService.getStudentRating(login, group.id!!)
             val jwt = jwtTokenUtil.doGenerateToken(user, authResponse.token, authResponse.cookie)
 
             return AuthHttpMessage().apply {
