@@ -77,8 +77,9 @@ class UserService(
                 logger.info("User ${user.login} was saved")
                 updateGroup(group)
             }
-            user.rating = groupService.getStudentRating(login, group.id!!)
-            userRepository.save(user)
+            val userSave = userRepository.findByLogin(user.login)
+            userSave?.rating = groupService.getStudentRating(login, group.id!!)
+            userRepository.save(userSave!!)
             val jwt = jwtTokenUtil.doGenerateToken(user, authResponse.token, authResponse.cookie)
 
             return AuthHttpMessage().apply {
