@@ -29,9 +29,4 @@ class GroupController(
         return groupService.getAllStudents(groupId)
     }
 
-    @GetMapping("/getStudentRating/{groupId}")
-    fun getStudentRating(@PathVariable groupId: Long): Int {
-        return groupService.getStudentRating("35567@iitu.edu.kz", groupId)
-    }
-
 }
