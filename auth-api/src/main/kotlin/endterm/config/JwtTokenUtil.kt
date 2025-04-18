@@ -33,6 +33,7 @@ class JwtTokenUtil: Serializable {
             .claim("birthDate", user.birthDate)
             .claim("personId", user.personId)
             .claim("role", user.role)
+            .claim("rating", user.rating)
             .setIssuedAt(Date(System.currentTimeMillis()))
             .setExpiration(Date(System.currentTimeMillis() + jwtValidationTime!!))
             .signWith(SignatureAlgorithm.HS256, jwtSecret)
