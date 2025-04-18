@@ -57,6 +57,9 @@ class User {
     @Column
     var birthDate: String? = null
 
+    @Column
+    var rating: Int? = null
+
     @ManyToOne
     @JoinColumn(name = "groupId", nullable = false)
     var group: Group? = null

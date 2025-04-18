@@ -25,11 +25,12 @@ import javax.transaction.Transactional
 @Service
 class UserService(
     @Value("\${platonus.api.url}") val platonusApiUrl: String,
-    @Autowired private val userRepository: UserRepository,
-    @Autowired private val restTemplateService: RestTemplateService,
-    @Autowired private val groupRepository: GroupRepository,
+    private val userRepository: UserRepository,
+    private val restTemplateService: RestTemplateService,
+    private val groupRepository: GroupRepository,
     private val jwtTokenUtil: JwtTokenUtil,
-    private val tokenService: TokenService
+    private val tokenService: TokenService,
+    private val groupService: GroupService
 ){
 
     val logger = LoggerFactory.getLogger(RestTemplateService::class.java)
@@ -68,6 +69,7 @@ class UserService(
                 this.address = student.adress
                 this.education = student.education
                 this.birthDate = student.birthDate
+                this.rating = groupService.getStudentRating(group.id!!)
             }
 
             if (userRepository.findByPersonId(user.personId!!) == null) {
