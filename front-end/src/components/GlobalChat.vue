@@ -1,4 +1,4 @@
-<template>
+<template class>
   <div>
     <NavBar />
 
@@ -21,6 +21,7 @@
             v-for="(msg, index) in messages"
             :key="index"
             class="chat-message"
+            :class="{ 'self-message': msg.from === userName }"
         >
           <div class="message-header">
             <span class="message-author">{{ msg.from }}</span>
@@ -218,12 +219,15 @@ onBeforeUnmount(() => {
   }
 }
 
+body {
+  overflow-x: hidden;
+}
+
 .chat-container {
   position: relative;
   z-index: 1;
-  width: 80%;
-  max-width: 900px;
-  height: 80vh;
+  max-width: 100vw;
+  height: 95vh;
   margin: 20px auto;
   background: #fff;
   border-radius: 16px;
@@ -243,7 +247,7 @@ onBeforeUnmount(() => {
 
 .chat-header {
   background: #fff;
-  padding: 20px;
+  padding: 10px;
   border-bottom: 2px solid #f0f0f0;
 }
 
@@ -265,6 +269,20 @@ onBeforeUnmount(() => {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+.chat-messages::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-messages {
+  scrollbar-width: none; /* Firefox */
+}
+
+.self-message {
+  align-self: flex-end;
+  background-color: #f5f0f7;
+  border-left: 3px solid #47054b;
+}
+
 .chat-message {
   background-color: #fff;
   padding: 15px;
@@ -274,11 +292,6 @@ onBeforeUnmount(() => {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.chat-message:nth-child(even) {
-  align-self: flex-end;
-  background-color: #f5f0f7;
-  border-left: 3px solid #47054b;
-}
 
 .message-header {
   display: flex;
@@ -296,11 +309,14 @@ onBeforeUnmount(() => {
 .message-time {
   font-size: 0.8rem;
   color: #666;
+  margin-left: 10px;
 }
 
 .message-content {
   line-height: 1.4;
   color: #333;
+  word-wrap: break-word;
+  white-space: normal;
 }
 
 .chat-input {
