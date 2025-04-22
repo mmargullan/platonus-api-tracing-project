@@ -3,6 +3,8 @@ package endterm.service
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import endterm.exception.CustomException
+import endterm.model.Dto.AuthResponse
+import endterm.model.Dto.LoginRequest
 import org.slf4j.LoggerFactory
 import org.springframework.http.*
 import org.springframework.stereotype.Component
@@ -51,14 +53,6 @@ class RestTemplateService() {
         }
     }
 
-    data class AuthResponse(
-        val token: String?,
-        val cookie: String?
-    )
 
-    data class LoginRequest(
-        val login: String,
-        val password: String
-    )
 
 }
