@@ -30,7 +30,6 @@ class UserService(
     @Autowired private val groupRepository: GroupRepository,
     private val jwtTokenUtil: JwtTokenUtil,
     private val tokenService: TokenService,
-    private val groupService: GroupService
 ){
 
     val logger = LoggerFactory.getLogger(RestTemplateService::class.java)
