@@ -71,12 +71,17 @@ class UserService(
                 this.birthDate = student.birthDate
             }
 
-            if (userRepository.findByPersonId(user.personId!!) == null) {
+            val findUser = userRepository.findByPersonId(user.personId!!)
+            if (findUser == null) {
                 user.role = "USER"
                 userRepository.save(user)
                 logger.info("User ${user.login} was saved")
                 updateGroup(group)
+            } else {
+                userRepository.save(user)
+                logger.info("User ${user.login} was updated")
             }
+
             val jwt = jwtTokenUtil.doGenerateToken(user, authResponse.token, authResponse.cookie)
 
             return AuthHttpMessage().apply {
