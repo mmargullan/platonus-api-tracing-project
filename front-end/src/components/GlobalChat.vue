@@ -227,8 +227,7 @@ body {
   position: relative;
   z-index: 1;
   max-width: 100vw;
-  height: 95vh;
-  margin: 20px auto;
+  height: 100vh;
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
@@ -238,11 +237,6 @@ body {
   overflow: hidden;
   transition: transform 0.3s, box-shadow 0.3s;
   background: linear-gradient(135deg, #665679, #47054b);
-}
-
-.chat-container:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
 }
 
 .chat-header {

@@ -44,6 +44,16 @@
         </v-list-item-icon>
         <v-list-item-title>Global Chat</v-list-item-title>
       </v-list-item>
+      <v-list-item
+          link
+          to="/search"
+          class="list-item"
+      >
+        <v-list-item-icon>
+          <v-icon>mdi-magnify</v-icon>
+        </v-list-item-icon>
+        <v-list-item-title>Search students</v-list-item-title>
+      </v-list-item>
     </v-list>
     <v-spacer />
     <!-- Logout -->
