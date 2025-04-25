@@ -53,6 +53,7 @@ class UserService(
                 groupRepository.save(groupSave)
             }
 
+            val jwt: String
             val user = User()
             val findUser = userRepository.findByPersonId(student.personID!!)
             if (findUser == null) {
@@ -63,12 +64,13 @@ class UserService(
                 userRepository.save(userSave)
                 logger.info("User ${userSave.login} was saved")
                 updateGroup(group)
+                jwt = jwtTokenUtil.doGenerateToken(userSave, authResponse.token, authResponse.cookie)
             } else {
                 val userSave = studentToUser(student, findUser, group)
                 userRepository.save(userSave)
+                jwt = jwtTokenUtil.doGenerateToken(userSave, authResponse.token, authResponse.cookie)
             }
 
-            val jwt = jwtTokenUtil.doGenerateToken(user, authResponse.token, authResponse.cookie)
             return AuthHttpMessage(
                 status = "ok",
                 message = "Successfully logged in",
