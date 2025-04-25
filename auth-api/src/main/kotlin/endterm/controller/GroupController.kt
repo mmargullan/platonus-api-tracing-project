@@ -14,11 +14,6 @@ class GroupController(
     private val groupService: GroupService,
 ) {
 
-    @GetMapping("/getAllGroups")
-    fun getAllGroups(): List<Group> {
-        return groupService.getAllGroups()
-    }
-
     @GetMapping("/getGroupById/{groupId}")
     fun getGroup(@PathVariable groupId: Long): Group {
         return groupService.getById(groupId)

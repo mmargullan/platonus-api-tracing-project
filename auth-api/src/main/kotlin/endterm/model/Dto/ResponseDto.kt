@@ -6,7 +6,6 @@ import endterm.component.DateDeserializer
 import endterm.component.DateSerializer
 
 class Student{
-
     var personID: Long? = null
     var lastnameEN: String? = null
     var firstnameEN: String? = null
@@ -22,7 +21,6 @@ class Student{
     @JsonDeserialize(using = DateDeserializer::class)
     @JsonSerialize(using = DateSerializer::class)
     var birthDate: String? = null
-
 }
 
 class UserInfoResponse {
