@@ -18,19 +18,12 @@ class CustomUserRepositoryImpl(
 
     fun getQuery(filter: Filter, isCount: Boolean): Query {
         val sql = StringBuilder()
-
         if (isCount) {
             sql.append("SELECT COUNT(*) FROM users WHERE 1=1")
         } else {
             sql.append("SELECT * FROM users WHERE 1=1")
         }
-
         val params = mutableMapOf<String, Any>()
-
-        filter.groupId?.let {
-            sql.append(" AND group_id = :groupId")
-            params["groupId"] = it
-        }
         filter.groupName?.let {
             sql.append(" AND group_name LIKE :groupName")
             params["groupName"] = "%$it%"
@@ -47,12 +40,10 @@ class CustomUserRepositoryImpl(
             sql.append(" AND (first_name LIKE :name OR last_name LIKE :name)")
             params["name"] = "%$name%"
         }
-
         filter.courseNumber?.let {
             sql.append(" AND course_number = :courseNumber")
             params["courseNumber"] = it
         }
-
         if (!isCount) {
             sql.append(" ORDER BY id DESC")
 
@@ -65,10 +56,8 @@ class CustomUserRepositoryImpl(
                 params["offset"] = it
             }
         }
-
         val query: Query = entityManager.createNativeQuery(sql.toString(), if (!isCount) User::class.java else null)
         params.forEach { (key, value) -> query.setParameter(key, value) }
-
         return query
     }
 

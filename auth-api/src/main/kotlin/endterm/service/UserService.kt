@@ -2,10 +2,7 @@ package endterm.service
 
 import endterm.config.JwtTokenUtil
 import endterm.exception.CustomException
-import endterm.model.Dto.AuthHttpMessage
-import endterm.model.Dto.Filter
-import endterm.model.Dto.PersonIdResponse
-import endterm.model.Dto.UserInfoResponse
+import endterm.model.Dto.*
 import endterm.model.Group
 import endterm.model.User
 import endterm.repository.GroupRepository
@@ -57,31 +54,16 @@ class UserService(
             }
 
             val user = User()
-            user.personId = student.personID
-            user.firstName = student.firstnameEN
-            user.lastName = student.lastnameEN
-            user.fullName = student.firstnameEN + " " + student.lastnameEN
-            user.gpa = student.GPA
-            user.phone = student.mobilePhone
-            user.groupName = student.groupName
-            user.specializationName = student.specializationNameEn
-            user.password = password
-            user.login = login
-            user.courseNumber = student.courseNumber
-            user.group = group
-            user.address = student.adress
-            user.education = student.education
-            user.birthDate = student.birthDate
-            user.rating = groupService.getStudentRating(user.login, group.id!!)
-
-            val findUser = userRepository.findByPersonId(user.personId!!)
+            val findUser = userRepository.findByPersonId(student.personID!!)
             if (findUser == null) {
                 user.role = "USER"
-                userRepository.save(user)
-                logger.info("User ${user.login} was saved")
+                val userSave = studentToUser(student, user, group)
+                userRepository.save(userSave)
+                logger.info("User ${userSave.login} was saved")
                 updateGroup(group)
             } else {
-                userRepository.save(findUser)
+                val userSave = studentToUser(student, findUser, group)
+                userRepository.save(userSave)
             }
 
             val jwt = jwtTokenUtil.doGenerateToken(user, authResponse.token, authResponse.cookie)
@@ -126,6 +108,24 @@ class UserService(
         } else {
             throw CustomException("No user found")
         }
+    }
+
+    fun studentToUser(student: Student, user: User, group: Group): User {
+        user.personId = student.personID
+        user.firstName = student.firstnameEN
+        user.lastName = student.lastnameEN
+        user.fullName = student.firstnameEN + " " + student.lastnameEN
+        user.gpa = student.GPA
+        user.phone = student.mobilePhone
+        user.groupName = student.groupName
+        user.specializationName = student.specializationNameEn
+        user.courseNumber = student.courseNumber
+        user.group = group
+        user.address = student.adress
+        user.education = student.education
+        user.birthDate = student.birthDate
+        user.rating = groupService.getStudentRating(user.login, group.id!!)
+        return user
     }
 
 }
