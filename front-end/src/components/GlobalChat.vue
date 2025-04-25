@@ -277,11 +277,7 @@ body {
   scrollbar-width: none; /* Firefox */
 }
 
-.self-message {
-  align-self: flex-end;
-  background-color: #f5f0f7;
-  border-left: 3px solid #47054b;
-}
+
 
 .chat-message {
   background-color: #fff;
@@ -292,7 +288,11 @@ body {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-
+.self-message {
+  align-self: flex-end;
+  background-color: #f5f0f7;
+  border-left: 3px solid #47054b;
+}
 .message-header {
   display: flex;
   justify-content: space-between;
@@ -361,7 +361,6 @@ body {
   background-color: #5d1870;
 }
 
-/* Responsive adjustments */
 @media (max-width: 1200px) {
   .chat-container {
     margin-left: auto;
