@@ -3,6 +3,8 @@ package endterm.controller
 import endterm.model.Dto.AuthHttpMessage
 import endterm.model.Dto.Filter
 import endterm.model.User
+import endterm.repository.UserRepository
+import endterm.service.GroupService
 import endterm.service.UserService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -10,7 +12,8 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/user")
 class UserController(
-    private val userService: UserService
+    private val userService: UserService,
+    private val userRepository: UserRepository
 ) {
 
     @PostMapping("/login")
@@ -20,7 +23,7 @@ class UserController(
 
     @GetMapping("/getAll")
     fun getAll(): List<User> {
-        return userService.getAll()
+        return userRepository.findAll()
     }
 
     @GetMapping("/getUsersByFilter")

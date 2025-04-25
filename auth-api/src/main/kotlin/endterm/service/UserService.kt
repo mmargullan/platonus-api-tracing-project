@@ -11,7 +11,6 @@ import endterm.model.User
 import endterm.repository.GroupRepository
 import endterm.repository.UserRepository
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -30,45 +29,50 @@ class UserService(
     private val groupRepository: GroupRepository,
     private val jwtTokenUtil: JwtTokenUtil,
     private val tokenService: TokenService,
+    private val groupService: GroupService
 ){
 
-    val logger = LoggerFactory.getLogger(RestTemplateService::class.java)
+    val logger = LoggerFactory.getLogger(UserService::class.java)
 
     @Transactional(rollbackOn = [Exception::class])
     fun getAuthenticated(login: String, password: String): AuthHttpMessage {
-        try{
+        try {
             val authResponse = restTemplateService.authorize("$platonusApiUrl/rest/api/login", login, password)
             val personId = restTemplateService.sendPlatonus("$platonusApiUrl/rest/api/person/personID", authResponse.token!!, authResponse.cookie!!, PersonIdResponse::class.java)?.personID
             val response = restTemplateService.sendPlatonus("$platonusApiUrl/rest/student/studentInfo/$personId/ru", authResponse.token, authResponse.cookie, UserInfoResponse::class.java)
                 ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid credentials")
             val student = response.student ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid request")
-            val group = Group().apply {
-                this.id = student.groupID
-                this.name = student.groupName
-            }
 
-            if (!groupRepository.findById(group.id!!).isPresent){
+            val group = Group()
+            group.id = student.groupID
+            group.name = student.groupName
+
+            val groupExists = groupRepository.findById(group.id!!)
+            if (!groupExists.isPresent) {
                 groupRepository.save(group)
                 logger.info("Group ${group.name} was saved")
+            } else {
+                val groupSave = groupExists.get()
+                groupRepository.save(groupSave)
             }
 
-            val user = User().apply {
-                this.personId = student.personID
-                this.firstName = student.firstnameEN
-                this.lastName = student.lastnameEN
-                this.fullName = student.firstnameEN + " " + student.lastnameEN
-                this.gpa = student.GPA
-                this.phone = student.mobilePhone
-                this.groupName = student.groupName
-                this.specializationName = student.specializationNameEn
-                this.password = password
-                this.login = login
-                this.courseNumber = student.courseNumber
-                this.group = group
-                this.address = student.adress
-                this.education = student.education
-                this.birthDate = student.birthDate
-            }
+            val user = User()
+            user.personId = student.personID
+            user.firstName = student.firstnameEN
+            user.lastName = student.lastnameEN
+            user.fullName = student.firstnameEN + " " + student.lastnameEN
+            user.gpa = student.GPA
+            user.phone = student.mobilePhone
+            user.groupName = student.groupName
+            user.specializationName = student.specializationNameEn
+            user.password = password
+            user.login = login
+            user.courseNumber = student.courseNumber
+            user.group = group
+            user.address = student.adress
+            user.education = student.education
+            user.birthDate = student.birthDate
+            user.rating = groupService.getStudentRating(user.login, group.id!!)
 
             val findUser = userRepository.findByPersonId(user.personId!!)
             if (findUser == null) {
@@ -77,19 +81,16 @@ class UserService(
                 logger.info("User ${user.login} was saved")
                 updateGroup(group)
             } else {
-                userRepository.save(user)
-                logger.info("User ${user.login} was updated")
-            }           
-
+                userRepository.save(findUser)
+            }
 
             val jwt = jwtTokenUtil.doGenerateToken(user, authResponse.token, authResponse.cookie)
-
-            return AuthHttpMessage().apply {
-                this.status = "ok"
-                this.message = "Successfully logged in"
-                this.token = jwt
-            }
-        }catch (ex: Exception){
+            return AuthHttpMessage(
+                status = "ok",
+                message = "Successfully logged in",
+                token = jwt
+            )
+        } catch (ex: Exception) {
             logger.error("Error while logging in: ", ex)
             throw CustomException(CustomException.BAD_REQUEST)
         }
@@ -104,19 +105,15 @@ class UserService(
         groupRepository.save(group)
     }
 
-    fun getAll(): List<User> {
-        return userRepository.findAll()
-    }
-
     fun getUsersByFilter(filter: Filter): ResponseEntity<Any> {
-        try{
+        try {
             val users = userRepository.getUsersFiltered(filter)
             val response = mapOf(
                 "users" to users,
                 "count" to users.count()
             )
             return ResponseEntity.ok(response)
-        } catch (e: Exception){
+        } catch (e: Exception) {
             logger.error("Error in getUserFiltered: ", e)
             throw CustomException("Error in getUserFiltered")
         }
@@ -124,7 +121,7 @@ class UserService(
 
     fun getUser(): User? {
         val user = userRepository.findByLogin(tokenService.username!!)
-        if (user != null){
+        if (user != null) {
             return user
         } else {
             throw CustomException("No user found")

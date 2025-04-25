@@ -14,10 +14,6 @@ class GroupService(
     private val tokenService: TokenService
 ) {
 
-    fun getAllGroups(): List<Group> {
-        return groupRepository.findAll()
-    }
-
     fun getById(id: Long): Group {
         val group = groupRepository.findById(id)
         return if (group.isPresent) group.get() else throw CustomException("Group not found")
