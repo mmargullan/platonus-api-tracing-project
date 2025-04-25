@@ -30,7 +30,6 @@ class UserService(
     private val groupRepository: GroupRepository,
     private val jwtTokenUtil: JwtTokenUtil,
     private val tokenService: TokenService,
-    private val groupService: GroupService
 ){
 
     val logger = LoggerFactory.getLogger(RestTemplateService::class.java)
@@ -71,15 +70,18 @@ class UserService(
                 this.birthDate = student.birthDate
             }
 
-            if (userRepository.findByPersonId(user.personId!!) == null) {
+            val findUser = userRepository.findByPersonId(user.personId!!)
+            if (findUser == null) {
                 user.role = "USER"
                 userRepository.save(user)
                 logger.info("User ${user.login} was saved")
                 updateGroup(group)
-            }
-            val userSave = userRepository.findByLogin(user.login)
-            userSave?.rating = groupService.getStudentRating(login, group.id!!)
-            userRepository.save(userSave!!)
+            } else {
+                userRepository.save(user)
+                logger.info("User ${user.login} was updated")
+            }           
+
+
             val jwt = jwtTokenUtil.doGenerateToken(user, authResponse.token, authResponse.cookie)
 
             return AuthHttpMessage().apply {
