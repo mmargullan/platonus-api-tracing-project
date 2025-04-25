@@ -52,6 +52,7 @@ jobs:
           
           # Очистка директорий сборки с максимальными правами
           run_with_sudo "rm -rf ./auth-api/build"
+          run_with_sudo "rm -rf ./chat-api/build"
           run_with_sudo "rm -rf ./docs-api/build"
           run_with_sudo "rm -rf ./api-gateway/build"
           
@@ -66,6 +67,7 @@ jobs:
           # Установка прав на gradlew
           run_with_sudo "chmod +x ./auth-api/gradlew"
           run_with_sudo "chmod +x ./docs-api/gradlew"
+          run_with_sudo "chmod +x ./chat-api/gradlew"
           run_with_sudo "chmod +x ./api-gateway/gradlew"
           
           # Сборка и деплой сервисов с максимальными правами
@@ -79,6 +81,11 @@ jobs:
           run_with_sudo "./docs-api/gradlew -p ./docs-api build -x test"
           run_with_sudo "cp ./docs-api/build/libs/docs-api-0.0.1-SNAPSHOT.jar /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar"
           run_with_sudo "chmod 777 /app/docs-api/docs-api-0.0.1-SNAPSHOT.jar"
+
+          # Chat API
+          run_with_sudo "./chat-api/gradlew -p ./chat-api build -x test"
+          run_with_sudo "cp ./chat-api/build/libs/chat-api-0.0.1-SNAPSHOT.jar /app/chat-api/chat-api-0.0.1-SNAPSHOT.jar"
+          run_with_sudo "chmod 777 /app/chat-api/chat-api-0.0.1-SNAPSHOT.jar"
           
           # API Gateway
           run_with_sudo "./api-gateway/gradlew -p ./api-gateway build -x test"
