@@ -88,7 +88,7 @@ class DocumentService(
         val pdfFile = File.createTempFile("resume", ".pdf")
         try {
             val command = listOf("soffice", "--headless", "--convert-to", "pdf", "--outdir",
-                pdfFile.parent, docxFile.absolutePath)D
+                pdfFile.parent, docxFile.absolutePath)
 
             val process = ProcessBuilder(command)
                 .redirectError(ProcessBuilder.Redirect.INHERIT)
