@@ -26,7 +26,7 @@ class UserController(
         return userRepository.findAll()
     }
 
-    @GetMapping("/getUsersByFilter")
+    @PostMapping("/getUsersByFilter")
     fun getUsersByFilter(@RequestBody filter: Filter): ResponseEntity<Any> {
         return userService.getUsersByFilter(filter)
     }
