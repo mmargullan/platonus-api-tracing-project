@@ -9,16 +9,14 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 
 @Configuration
 class RedisConfig {
+
     @Bean
     fun redisTemplate(factory: RedisConnectionFactory): RedisTemplate<String, Any> {
         val template = RedisTemplate<String, Any>()
         template.setConnectionFactory(factory)
         template.keySerializer = StringRedisSerializer()
-
-        val objectMapper = com.fasterxml.jackson.databind.ObjectMapper()
-            .enableDefaultTyping(com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping.NON_FINAL)
-
-        template.valueSerializer = GenericJackson2JsonRedisSerializer(objectMapper)
+        template.valueSerializer = GenericJackson2JsonRedisSerializer()
         return template
     }
+
 }
