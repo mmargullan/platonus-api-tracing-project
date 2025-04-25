@@ -27,17 +27,10 @@ class GroupService(
         return userRepository.findUsersByGroupId(groupId)
     }
 
-    fun getStudentRating(groupId: Long): Int {
-        val groupExists = groupRepository.findById(groupId)
-        val group: Group
-        if (groupExists.isPresent) {
-            group = groupExists.get()
-        } else{
-            throw CustomException("Group not found")
-        }
-        val students = getAllStudents(group.id!!)
+    fun getStudentRating(username: String, groupId: Long): Int {
+        val students = getAllStudents(groupId)
         for (i in students.indices) {
-            if (students[i].login == tokenService.username) {
+            if (students[i].login == username) {
                 return i + 1
             }
         }

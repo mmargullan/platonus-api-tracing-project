@@ -25,9 +25,9 @@ import javax.transaction.Transactional
 @Service
 class UserService(
     @Value("\${platonus.api.url}") val platonusApiUrl: String,
-    @Autowired private val userRepository: UserRepository,
-    @Autowired private val restTemplateService: RestTemplateService,
-    @Autowired private val groupRepository: GroupRepository,
+    private val userRepository: UserRepository,
+    private val restTemplateService: RestTemplateService,
+    private val groupRepository: GroupRepository,
     private val jwtTokenUtil: JwtTokenUtil,
     private val tokenService: TokenService,
 ){
@@ -79,7 +79,8 @@ class UserService(
             } else {
                 userRepository.save(user)
                 logger.info("User ${user.login} was updated")
-            }
+            }           
+
 
             val jwt = jwtTokenUtil.doGenerateToken(user, authResponse.token, authResponse.cookie)
 
