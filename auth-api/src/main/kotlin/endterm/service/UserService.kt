@@ -57,6 +57,8 @@ class UserService(
             val findUser = userRepository.findByPersonId(student.personID!!)
             if (findUser == null) {
                 user.role = "USER"
+                user.login = login
+                user.password = password
                 val userSave = studentToUser(student, user, group)
                 userRepository.save(userSave)
                 logger.info("User ${userSave.login} was saved")
