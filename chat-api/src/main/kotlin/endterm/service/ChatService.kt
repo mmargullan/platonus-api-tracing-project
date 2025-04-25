@@ -1,6 +1,7 @@
 package endterm.service
 
 import endterm.dto.ChatMessage
+import org.slf4j.LoggerFactory
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
@@ -12,7 +13,10 @@ class ChatService(
     private val redisTemplate: RedisTemplate<String, Any>
 ) {
 
+    val logger = LoggerFactory.getLogger(ChatService::class.java)
+
     fun saveMessage(message: ChatMessage) {
+        logger.info("Saving message ${message.text}")
         val key = getTodayKey()
         val ops = redisTemplate.opsForList()
         ops.rightPush(key, message)
@@ -23,7 +27,19 @@ class ChatService(
         val key = getTodayKey()
         val ops = redisTemplate.opsForList()
         val size = ops.size(key) ?: 0
-        return ops.range(key, 0, size)?.map { it as ChatMessage } ?: emptyList()
+        return ops.range(key, 0, size)?.map {
+            when (it) {
+                is ChatMessage -> it
+                is Map<*, *> -> {
+                    ChatMessage(
+                        from = it["from"] as String,
+                        text = it["text"] as String,
+                        date = it["date"] as String
+                    )
+                }
+                else -> throw IllegalStateException("Unexpected type: ${it?.javaClass}")
+            }
+        } ?: emptyList()
     }
 
     private fun getTodayKey(): String {
