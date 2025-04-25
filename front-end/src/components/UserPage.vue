@@ -250,36 +250,13 @@ const fetchUserInfo = async () => {
 
     localStorage.setItem('userFullName', data.fullName);
 
-    if (userInfo.value.group && userInfo.value.group.id) {
-      fetchGroupRating(userInfo.value.group.id);
-    }
+    groupRating.value = data.rating;
   } catch (error) {
     console.error("Ошибка при получении данных пользователя:", error.message);
     router.push({ name: "AuthForm" });
   }
 };
 
-const fetchGroupRating = async (groupId) => {
-  console.log("Получение рейтинга группы для groupId:", groupId);
-  try {
-    const token = Cookies.get('auth_token');
-    const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/auth-api/group/getStudentRating/${groupId}`, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    
-    if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
-    
-    const data = await response.json();
-    console.log("Данные рейтинга группы:", data);
-    groupRating.value = data;
-  } catch (error) {
-    console.error("Ошибка при получении рейтинга группы:", error.message);
-  }
-};
 
 const generateStars = () => {
   for (let i = 0; i < 200; i++) {
