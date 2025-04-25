@@ -3,6 +3,7 @@ import AuthForm from "./components/AuthForm.vue";
 import UserPage from "./components/UserPage.vue";
 import GradesPage from "./components/GradesPage.vue";
 import Chat from "./components/GlobalChat.vue"
+import UserSearch from "./components/UserSearch.vue";
 
 const routes = [
     {
@@ -28,6 +29,12 @@ const routes = [
         name: "Chat",
         component: Chat,
         meta: { title: "Chat" }
+    },
+    {
+        path: "/search",
+        name: "UsersSearch",
+        component: UserSearch,
+        meta: { title: "User Search" }
     }
 ]
 

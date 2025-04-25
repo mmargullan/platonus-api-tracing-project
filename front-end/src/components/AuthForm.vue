@@ -107,7 +107,7 @@ const handleSubmit = async () => {
                   <!-- Placeholder for UI elements (logo, image, etc.) -->
                   <v-icon size="64" color="#665679">mdi-school</v-icon>
                 </div>
-                <h1>Welcome to Thraessa</h1>
+                <h1>Welcome back!</h1>
                 <p>
                   This platform is designed specifically for IITU students.
                   Stay updated with the latest news, events, and opportunities tailored to your journey.
