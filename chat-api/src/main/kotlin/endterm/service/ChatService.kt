@@ -27,19 +27,7 @@ class ChatService(
         val key = getTodayKey()
         val ops = redisTemplate.opsForList()
         val size = ops.size(key) ?: 0
-        return ops.range(key, 0, size)?.map {
-            when (it) {
-                is ChatMessage -> it
-                is Map<*, *> -> {
-                    ChatMessage(
-                        from = it["from"] as String,
-                        text = it["text"] as String,
-                        date = it["date"] as String
-                    )
-                }
-                else -> throw IllegalStateException("Unexpected type: ${it?.javaClass}")
-            }
-        } ?: emptyList()
+        return ops.range(key, 0, size)?.map { it as ChatMessage } ?: emptyList()
     }
 
     private fun getTodayKey(): String {
