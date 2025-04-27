@@ -154,7 +154,7 @@ const generateStars = () => {
 
 onMounted(() => {
   generateStars();
-  fetchUsers();
+  // fetchUsers();
 });
 </script>
 
