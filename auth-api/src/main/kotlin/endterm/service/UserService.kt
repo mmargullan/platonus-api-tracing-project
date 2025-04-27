@@ -68,6 +68,7 @@ class UserService(
             } else {
                 val userSave = studentToUser(student, findUser, group)
                 userRepository.save(userSave)
+                updateGroup(group)
                 jwt = jwtTokenUtil.doGenerateToken(userSave, authResponse.token, authResponse.cookie)
             }
 
@@ -89,6 +90,7 @@ class UserService(
         group.studentCount = count
         group.averageGpa = averageGpa
         groupRepository.save(group)
+        groupService.updateStudentsRating(userRepository.findAll())
     }
 
     fun getUsersByFilter(filter: Filter): ResponseEntity<Any> {
@@ -128,7 +130,7 @@ class UserService(
         user.address = student.adress
         user.education = student.education
         user.birthDate = student.birthDate
-        user.rating = groupService.getStudentRating(user.login, group.id!!)
+//        user.rating = groupService.getStudentRating(user.login, group.id!!)
         return user
     }
 
