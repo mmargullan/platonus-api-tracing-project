@@ -8,8 +8,6 @@
         <v-layout>
           <!-- Верхний бар с выбором года, семестра и кнопкой Home -->
           <v-app-bar prominent class="custom-app-bar">
-
-            <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
             <v-toolbar-title>Grades</v-toolbar-title>
             <v-spacer></v-spacer>
             <!-- Кнопки выбора года и семестра -->
@@ -95,7 +93,6 @@ import axios from 'axios';
 import NavBar from '@/components/NavBar.vue';
 
 const router = useRouter();
-const drawer = ref(false);
 const courses = ref([]);
 
 // Выбранные год и семестр (дефолтно можно задать текущие значения)

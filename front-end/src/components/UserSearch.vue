@@ -42,22 +42,36 @@
 
         <v-list v-if="users.length" class="search-results">
           <v-list-item
-              v-for="(user, index) in users"
-              :key="index"
-              class="search-item"
+            v-for="(user, index) in users"
+            :key="index"
+            class="search-item"
           >
             <v-list-item-avatar>
               <v-avatar color="purple lighten-1">
                 <span class="white--text">{{ user.fullName?.charAt(0) }}</span>
               </v-avatar>
             </v-list-item-avatar>
+
             <v-list-item-content>
-              <v-list-item-title>{{ user.fullName }}</v-list-item-title>
-              <v-list-item-subtitle>{{ user.groupName }} - {{ user.specializationName }}</v-list-item-subtitle>
+              <v-list-item-title class="user-title">
+                {{ user.fullName }}
+                <v-chip
+                  v-if="user.role === 'ADMIN'"
+                  color="red lighten-2"
+                  text-color="white"
+                  small
+                  class="admin-chip"
+                >
+                  Admin
+                </v-chip>
+              </v-list-item-title>
+
+              <v-list-item-subtitle>
+                {{ user.groupName }} - {{ user.specializationName }}
+              </v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
         </v-list>
-
         <div v-else class="no-results">No users found.</div>
 
         <div class="pagination-controls">
@@ -140,6 +154,7 @@ const generateStars = () => {
 
 onMounted(() => {
   generateStars();
+  fetchUsers();
 });
 </script>
 
@@ -149,6 +164,7 @@ onMounted(() => {
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  background: linear-gradient(135deg, #665679, #47054b);
 }
 
 .star {
@@ -169,8 +185,11 @@ onMounted(() => {
   padding: 40px;
   display: flex;
   justify-content: center;
-  background: linear-gradient(135deg, #665679, #47054b);
+  /* Убираем фоновый градиент отсюда */
+  background: transparent;
   min-height: 100vh;
+  margin-left: 200px; /* Ширина NavBar */
+  width: calc(100% - 200px); /* Полная ширина минус NavBar */
 }
 
 .block {

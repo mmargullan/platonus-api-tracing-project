@@ -57,7 +57,7 @@ class TokenService {
 
     fun dataToMap(nationality: String): Map<String, String> {
         return mapOf(
-            "fullname" to "$firstName!! $lastName!!",
+            "fullname" to "$firstName $lastName",
             "address" to address!!,
             "birthdate" to birthDate!!,
             "nationality" to nationality,

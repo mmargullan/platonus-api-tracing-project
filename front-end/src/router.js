@@ -4,6 +4,7 @@ import UserPage from "./components/UserPage.vue";
 import GradesPage from "./components/GradesPage.vue";
 import Chat from "./components/GlobalChat.vue"
 import UserSearch from "./components/UserSearch.vue";
+import DocumentsPage from "./components/DocumentsPage.vue";
 
 const routes = [
     {
@@ -35,6 +36,12 @@ const routes = [
         name: "UsersSearch",
         component: UserSearch,
         meta: { title: "User Search" }
+    },
+    {
+        path: "/documents",
+        name: "Documents",
+        component: DocumentsPage,
+        meta: { title: "Documents" }
     }
 ]
 
