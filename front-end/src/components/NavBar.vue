@@ -54,6 +54,16 @@
         </v-list-item-icon>
         <v-list-item-title>Search students</v-list-item-title>
       </v-list-item>
+      <v-list-item
+          link
+          to="/documents"
+          class="list-item"
+      >
+        <v-list-item-icon>
+          <v-icon>mdi-file-document-multiple</v-icon>
+        </v-list-item-icon>
+        <v-list-item-title>Documents</v-list-item-title>
+      </v-list-item>
     </v-list>
     <v-spacer />
     <!-- Logout -->
