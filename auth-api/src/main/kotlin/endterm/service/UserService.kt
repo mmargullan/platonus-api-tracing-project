@@ -90,7 +90,7 @@ class UserService(
         group.studentCount = count
         group.averageGpa = averageGpa
         groupRepository.save(group)
-        groupService.updateStudentsRating(userRepository.findAll())
+        groupService.updateStudentsRating(userRepository.findUsersByGroupId(group.id!!))
     }
 
     fun getUsersByFilter(filter: Filter): ResponseEntity<Any> {
