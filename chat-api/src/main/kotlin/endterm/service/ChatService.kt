@@ -39,7 +39,12 @@ class ChatService(
         val ops = redisTemplate.opsForList()
         val size = ops.size(key) ?: 0
         val allMessages = ops.range(key, 0, size)?.map { it as ChatMessage } ?: emptyList()
-        return allMessages.filter { it.userId == userId }
+        val userMessages = allMessages.filter { it.userId == userId }
+        userMessages.forEach { message ->
+            while (ops.remove(key, 1, message)!! > 0) {
+            }
+        }
+        return userMessages
     }
 
 }
