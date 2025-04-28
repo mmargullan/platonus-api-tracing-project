@@ -23,14 +23,33 @@ class GroupService(
         return userRepository.findUsersByGroupId(groupId)
     }
 
-    fun getStudentRating(username: String, groupId: Long): Int {
+    fun getStudentRating(gpa: Double, groupId: Long): Int {
         val students = getAllStudents(groupId)
-        for (i in students.indices) {
-            if (students[i].login == username) {
-                return i + 1
+//        for (i in students.indices) {
+//            if (students[i].login == username) {
+//                return i + 1
+//            }
+//        }
+        var left = 0
+        var right = students.size - 1
+        while (left <= right) {
+            val middle = (left + right) / 2
+            if (students[middle].gpa == gpa) {
+                return middle + 1
+            } else if (students[middle].gpa!! < gpa) {
+                right = middle - 1
+            } else {
+                left = middle + 1
             }
         }
-        return 0
+        return left + 1
+    }
+
+    fun updateStudentsRating(students: List<User>) {
+        for (student in students) {
+            student.rating = getStudentRating(student.gpa!!, student.group?.id!!)
+        }
+        userRepository.saveAll(students)
     }
 
 }
