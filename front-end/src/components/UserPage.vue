@@ -177,6 +177,7 @@ import NavBar from '@/components/NavBar.vue';
 
 const router = useRouter();
 const stars = ref([]);
+const isAdmin = ref(false);
 
 const userInfo = ref({
   fullName: '',
@@ -188,6 +189,7 @@ const userInfo = ref({
     name: '',
     studentCount: ''
   },
+  role: '',
 });
 
 const firstName = computed(() => {
@@ -249,6 +251,9 @@ const fetchUserInfo = async () => {
     userInfo.value = data;
 
     localStorage.setItem('userFullName', data.fullName);
+    const role = data.role;
+    localStorage.setItem('userRole', role);
+    isAdmin.value = role === 'ADMIN';
 
     groupRating.value = data.rating;
   } catch (error) {

@@ -18,6 +18,7 @@
     "core-js": "^3.8.3",
     "js-cookie": "^2.2.1",
     "jwt-decode": "^3.1.2",
+    "pinia": "^3.0.2",
     "sockjs-client": "^1.6.1",
     "vue": "^3.2.13",
     "vue-router": "^4.5.0",
