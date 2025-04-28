@@ -16,7 +16,6 @@ class ChatService(
     val logger = LoggerFactory.getLogger(ChatService::class.java)
 
     fun saveMessage(message: ChatMessage) {
-        logger.info("Saving message ${message.text}")
         val key = getTodayKey()
         val ops = redisTemplate.opsForList()
         ops.rightPush(key, message)
@@ -34,4 +33,13 @@ class ChatService(
         val today = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
         return "chat:messages:$today"
     }
+
+    fun getMessagesByUserId(userId: String): List<ChatMessage> {
+        val key = getTodayKey()
+        val ops = redisTemplate.opsForList()
+        val size = ops.size(key) ?: 0
+        val allMessages = ops.range(key, 0, size)?.map { it as ChatMessage } ?: emptyList()
+        return allMessages.filter { it.userId == userId }
+    }
+
 }
