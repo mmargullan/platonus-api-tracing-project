@@ -5,14 +5,14 @@
     class="navbar-drawer"
     width="200"
   >
-  
+
     <div class="profile-section">
       <v-avatar size="64" class="mb-2">
         <img src="@/assets/profile.svg" alt="Profile" class="avatar-img"/>
       </v-avatar>
       <div class="username">{{ userName }}</div>
     </div>
-   
+
     <v-list dense nav>
       <v-list-item
         link
@@ -64,6 +64,17 @@
         </v-list-item-icon>
         <v-list-item-title>Documents</v-list-item-title>
       </v-list-item>
+      <v-list-item
+          v-if="storedRole==='ADMIN'"
+          link
+          to="/admin-panel"
+          class="list-item"
+      >
+        <v-list-item-icon>
+          <v-icon>mdi-account-cog</v-icon>
+        </v-list-item-icon>
+        <v-list-item-title>Admin Panel</v-list-item-title>
+      </v-list-item>
     </v-list>
     <v-spacer />
     <!-- Logout -->
@@ -89,24 +100,27 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const userName = ref('');
+const storedRole = ref(localStorage.getItem('userRole'));
 
 const logout = () => {
   Cookies.remove('auth_token');
   localStorage.removeItem('userFullName');
+  localStorage.removeItem('userRole');
+  storedRole.value = null;
   router.push({ name: 'AuthForm' });
 };
 
 const fetchUserName = async () => {
-  
+
   const storedName = localStorage.getItem('userFullName');
   if (storedName) {
     userName.value = storedName;
   }
-  
-  
+
+
   const token = Cookies.get('auth_token');
   if (!token) return;
-  
+
   try {
     const response = await fetch(
       `${process.env.VUE_APP_BASE_URL}/api/auth-api/user/getUser`,
@@ -118,11 +132,13 @@ const fetchUserName = async () => {
         },
       }
     );
-    
+
     if (response.ok) {
       const data = await response.json();
       userName.value = data.fullName;
       localStorage.setItem('userFullName', data.fullName);
+      localStorage.setItem('userRole', data.role);
+      storedRole.value = data.role;
     }
   } catch (err) {
     console.error('Failed to fetch user name', err);

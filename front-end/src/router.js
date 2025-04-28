@@ -5,6 +5,7 @@ import GradesPage from "./components/GradesPage.vue";
 import Chat from "./components/GlobalChat.vue"
 import UserSearch from "./components/UserSearch.vue";
 import DocumentsPage from "./components/DocumentsPage.vue";
+import AdminPanel from "./components/AdminPanel.vue";
 
 const routes = [
     {
@@ -42,6 +43,12 @@ const routes = [
         name: "Documents",
         component: DocumentsPage,
         meta: { title: "Documents" }
+    },
+    {
+        path: "/admin-panel",
+        name: "AdminPanel",
+        component: AdminPanel,
+        meta: { title: "Admin Panel" }
     }
 ]
 

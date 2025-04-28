@@ -5,6 +5,7 @@ import endterm.service.ChatService
 import org.springframework.web.bind.annotation.*
 
 @RestController
+@CrossOrigin(origins = ["*"])
 @RequestMapping("/notification")
 class NotificationController(
     private val chatService: ChatService
