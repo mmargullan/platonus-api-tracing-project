@@ -239,7 +239,7 @@ const fetchUserInfo = async () => {
       router.push({ name: "AuthForm" });
       return;
     }
-    const response = await fetch(`${process.env.VUE_APP_BASE_URL}/auth-api/user/getUser`, {
+    const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/auth-api/user/getUser`, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -288,7 +288,7 @@ const downloadOrGenerate = async () => {
 
   const fetchDocs = async () => {
     const res = await fetch(
-      `${process.env.VUE_APP_BASE_URL}/docs-api/document/findByPersonId/${personId.value}`,
+      `${process.env.VUE_APP_BASE_URL}/api/docs-api/document/findByPersonId/${personId.value}`,
       { headers }
     );
     if (!res.ok) throw new Error(`Ошибка списка: ${res.status}`);
@@ -300,7 +300,7 @@ const downloadOrGenerate = async () => {
 
     if (!docs.length) {
       await fetch(
-        `${process.env.VUE_APP_BASE_URL}/docs-api/document/generate?nationality=kazakh`,
+        `${process.env.VUE_APP_BASE_URL}/api/docs-api/document/generate?nationality=kazakh`,
         { method: 'POST', headers }
       );
       await new Promise(r => setTimeout(r, 2000));
@@ -311,7 +311,7 @@ const downloadOrGenerate = async () => {
     }
 
     const downloadRes = await fetch(
-      `${process.env.VUE_APP_BASE_URL}/docs-api/document/download?personId=${personId.value}`,
+      `${process.env.VUE_APP_BASE_URL}/api/docs-api/document/download?personId=${personId.value}`,
       { method: 'POST', headers }
     );
     if (!downloadRes.ok) throw new Error(`Ошибка скачивания: ${downloadRes.status}`);

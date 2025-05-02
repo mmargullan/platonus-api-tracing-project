@@ -56,7 +56,7 @@ const handleSubmit = async () => {
   isLoading.value = true;
 
   try {
-    const response = await fetch(`${process.env.VUE_APP_BASE_URL}/auth-api/user/login`, {
+    const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/auth-api/user/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
