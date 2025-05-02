@@ -48,7 +48,10 @@
             <span class="info-value">{{ userInfo.group?.studentCount || 'N/A' }}</span>
           </div>
         </div>
-        
+        <v-btn color="primary" @click="downloadOrGenerate">
+          <v-icon left>mdi-download</v-icon>
+            Скачать PDF
+        </v-btn>
       </div>
       
       
@@ -225,6 +228,8 @@ const isTokenExpired = (token) => {
   }
 };
 
+const personId = ref(null);
+
 const fetchUserInfo = async () => {
   console.log("Получение информации о пользователе...");
   try {
@@ -234,7 +239,7 @@ const fetchUserInfo = async () => {
       router.push({ name: "AuthForm" });
       return;
     }
-    const response = await fetch(`${process.env.VUE_APP_BASE_URL}/api/auth-api/user/getUser`, {
+    const response = await fetch(`${process.env.VUE_APP_BASE_URL}/auth-api/user/getUser`, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -247,6 +252,7 @@ const fetchUserInfo = async () => {
     const data = await response.json();
     console.log("Информация о пользователе получена:", data);
     userInfo.value = data;
+    personId.value = data.personId; 
 
     localStorage.setItem('userFullName', data.fullName);
 
@@ -272,10 +278,68 @@ const generateStars = () => {
   }
 };
 
+onMounted(fetchUserInfo);
+
+const downloadOrGenerate = async () => {
+  const token = Cookies.get('auth_token');
+  if (!personId.value) return alert('Подождите загрузки профиля…');
+
+  const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+  const fetchDocs = async () => {
+    const res = await fetch(
+      `${process.env.VUE_APP_BASE_URL}/docs-api/document/findByPersonId/${personId.value}`,
+      { headers }
+    );
+    if (!res.ok) throw new Error(`Ошибка списка: ${res.status}`);
+    return res.json();
+  };
+
+  try {
+    let docs = await fetchDocs();
+
+    if (!docs.length) {
+      await fetch(
+        `${process.env.VUE_APP_BASE_URL}/docs-api/document/generate?nationality=kazakh`,
+        { method: 'POST', headers }
+      );
+      await new Promise(r => setTimeout(r, 2000));
+      docs = await fetchDocs();
+      if (!docs.length) {
+        return alert('Не удалось сгенерировать документ, попробуйте позже.');
+      }
+    }
+
+    const downloadRes = await fetch(
+      `${process.env.VUE_APP_BASE_URL}/docs-api/document/download?personId=${personId.value}`,
+      { method: 'POST', headers }
+    );
+    if (!downloadRes.ok) throw new Error(`Ошибка скачивания: ${downloadRes.status}`);
+
+    const blob = await downloadRes.blob();
+    const url = URL.createObjectURL(blob);
+    const cd = downloadRes.headers.get('Content-Disposition') || '';
+    let filename = cd.match(/filename="(.+)"/)?.[1] || 'resume.pdf';
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+
+  } catch (err) {
+    console.error(err);
+    alert(`Ошибка: ${err.message}`);
+  }
+};
+
 onMounted(() => {
   fetchUserInfo();
   generateStars();
 });
+
 </script>
 
 <style scoped>

@@ -99,7 +99,7 @@ const fetchUserName = async () => {
   
   try {
     const response = await fetch(
-      `${process.env.VUE_APP_BASE_URL}/api/auth-api/user/getUser`,
+      `${process.env.VUE_APP_BASE_URL}/auth-api/user/getUser`,
       {
         method: 'GET',
         headers: {

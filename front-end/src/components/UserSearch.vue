@@ -97,7 +97,7 @@ const fetchUsers = async () => {
 
   try {
     const response = await axios.post(
-        `${process.env.VUE_APP_BASE_URL}/api/auth-api/user/getUsersByFilter`,
+        `${process.env.VUE_APP_BASE_URL}/auth-api/user/getUsersByFilter`,
         filter,
         {
           headers: {
