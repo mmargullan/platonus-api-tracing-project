@@ -18,6 +18,12 @@ repositories {
 	mavenCentral()
 }
 
+dependencyManagement {
+	imports {
+		mavenBom("org.springframework.cloud:spring-cloud-dependencies:2021.0.8")
+	}
+}
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-websocket")
@@ -30,6 +36,8 @@ dependencies {
 	implementation("org.webjars:stomp-websocket:2.3.3")
 	implementation("org.webjars:sockjs-client:1.5.1")
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+	implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 }
 
 tasks.withType<KotlinCompile> {
