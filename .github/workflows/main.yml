@@ -55,6 +55,7 @@ jobs:
           run_with_sudo "rm -rf ./chat-api/build"
           run_with_sudo "rm -rf ./docs-api/build"
           run_with_sudo "rm -rf ./api-gateway/build"
+          run_with_sudo "rm -rf ./eureka-server/build"
           
           # Обновление проекта с максимальными правами
           run_with_sudo "git config --global --add safe.directory /deploy/platonus-api-tracing-project"
@@ -69,6 +70,7 @@ jobs:
           run_with_sudo "chmod +x ./docs-api/gradlew"
           run_with_sudo "chmod +x ./chat-api/gradlew"
           run_with_sudo "chmod +x ./api-gateway/gradlew"
+          run_with_sudo "chmod +x ./eureka-server/gradlew"
           
           # Сборка и деплой сервисов с максимальными правами
           
@@ -91,6 +93,11 @@ jobs:
           run_with_sudo "./api-gateway/gradlew -p ./api-gateway build -x test"
           run_with_sudo "cp ./api-gateway/build/libs/api-gateway-0.0.1-SNAPSHOT.jar /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar"
           run_with_sudo "chmod 777 /app/api-gateway/api-gateway-0.0.1-SNAPSHOT.jar"
+
+          # API Gateway
+          run_with_sudo "./eureka-server/gradlew -p ./eureka-server build -x test"
+          run_with_sudo "cp ./eureka-server/build/libs/eureka-server-0.0.1-SNAPSHOT.jar /app/eureka-server/eureka-server-0.0.1-SNAPSHOT.jar"
+          run_with_sudo "chmod 777 /app/eureka-server/eureka-server-0.0.1-SNAPSHOT.jar"
           
           # Front-End
           run_with_sudo "rm -rf /app/main-ui/*"
